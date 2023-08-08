@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+function zpack-selfupdate() {
+    if [[ -e "$ZPACK_DIR/.git" ]]; then
+        git -C $ZPACK_DIR pull --ff-only
+        zpack-reset
+    else
+        __zpack_err "Not running from a git repository; cannot automatically update."
+        return 1
+    fi
+}
+
+zpack-selfupdate $@

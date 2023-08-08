@@ -1,0 +1,29 @@
+#!/usr/bin/env zsh
+
+function zpack-update() {
+    local repo dir
+
+    for repo in $ZPACK_PLUGINS_DIR/**/.git(/F); do
+        dir="${repo%/.git}"
+
+        __zpack_out "Updating '${dir#$ZPACK_PLUGINS_DIR/}' ..."
+
+        git -C $dir reset --hard --quiet
+        git -C $dir clean -df --quiet
+        git -C $dir pull  --ff-only
+
+        __zpack_out
+    done
+
+    for version_file in $ZPACK_RELEASES_DIR/**/.zpack_release_version(.); do
+        rm "$version_file"
+    done
+
+    for snippet in $ZPACK_SNIPPETS_DIR/**/*(.); do
+        rm "$snippet"
+    done
+
+    zpack-reset
+}
+
+zpack-update $@

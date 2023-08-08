@@ -1,0 +1,76 @@
+#!/usr/bin/env zsh
+
+function __zpack_out() {
+    print -P "%B%F{green}\u276F %f%b""$*"
+}
+
+function __zpack_out_plain() {
+    print "$*"
+}
+
+function __zpack_warn() {
+    print -P %F{yellow}"$*"%f >&2
+}
+
+function __zpack_err() {
+    print -P %F{red}"$*"%f >&2
+}
+
+function __zpack_subcmd() {
+    local prefix=$1
+    local subcmd=$2
+
+    if [[ -z $prefix ]]; then
+        __zpack_err 'No prefix given.'
+        return 1
+    fi
+    if [[ -z $subcmd ]]; then
+        __zpack_err 'No subcommand given.'
+        return 1
+    fi
+    if [[ ${+functions[__zpack_${prefix}_${subcmd}]} == 0 ]]; then
+        __zpack_err 'Invalid subcomand given.'
+        return 1
+    fi
+    shift 2
+    __zpack_${prefix}_${subcmd} $@
+}
+
+function __zpack_init() {
+    # Init Variables
+    ZPACK_PLUGINS=()
+    ZPACK_RELEASES=()
+    ZPACK_SNIPPETS=()
+    ZPACK_BUNDLES=()
+
+    # Setup directories
+    local dir
+    for dir in $ZPACK_BIN_DIR $ZPACK_CACHE_DIR; do
+        [[ -d $dir ]] || mkdir -p $dir
+    done
+    path+=($ZPACK_BIN_DIR)
+
+    # Zsh Plugin Standard
+    PMSPEC=0fbis
+    typeset -ga zsh_loaded_plugins
+
+    # Init completion
+    __zpack_completion init
+}
+
+function __zpack() {
+    local subcmd=$1
+
+    if [[ -z $subcmd ]]; then
+        __zpack_err 'No subcommand given.'
+        return 1
+    fi
+    if [[ ${+functions[__zpack_${subcmd}]} == 0 ]]; then
+        __zpack_err 'Invalid subcomand given.'
+        return 1
+    fi
+    shift
+    __zpack_${subcmd} $@
+}
+
+__zpack $@

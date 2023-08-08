@@ -1,0 +1,6 @@
+bin
+plugins
+releases
+snippets
+cache
+*.zwc

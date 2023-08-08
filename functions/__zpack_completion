@@ -1,0 +1,65 @@
+#!/usr/bin/env zsh
+
+function __zpack_completion_init {
+    # Check if compinit was already run
+    if [[ ${+_comps} == 1 && ${+_comp_options} == 1 ]]; then
+        if [[ ${ZPACK_IGNORE_COMPINIT} != 1 ]]; then
+            __zpack_warn "Warning: completion system was initialised before zpack. This affects performance."
+            __zpack_warn "         Disable this warning by fixing the issue or by setting ZPACK_IGNORE_COMPINIT=1"
+        fi
+    else
+        # Mock completion
+        _ZPACK_COMPDEFS=()
+        _ZPACK_COMPLETES=()
+        _ZPACK_COMPLETION=1
+
+        function compinit() {}
+        function bashcompinit() {}
+
+        function compdef() {
+            _ZPACK_COMPDEFS+=("$*")
+        }
+        function complete() {
+            _ZPACK_COMPLETES+=("$*")
+        }
+    fi
+    unfunction __zpack_completion_init
+}
+
+function __zpack_completion_apply() {
+    if [[ -n _ZPACK_COMPLETION ]]; then
+        # Unmock completion
+        unfunction compinit
+        unfunction bashcompinit
+
+        # Load real completion
+        autoload -Uz compinit && compinit -d $ZPACK_COMPDUMP_PATH
+        if [[ $? -ne 0 ]]; then
+            __zpack_err "Could not initialise completions."
+            return 1
+        fi
+        zpack-compile $ZPACK_COMPDUMP_PATH
+        autoload -Uz bashcompinit && bashcompinit
+
+        # Apply definitions from mocks
+        local comp
+        for comp in $_ZPACK_COMPDEFS; do
+            eval "compdef $comp"
+        done
+        for comp in $_ZPACK_COMPLETES; do
+            eval "complete $comp"
+        done
+
+        # Cleanup
+        unset _ZPACK_COMPDEFS
+        unset _ZPACK_COMPLETES
+        unset _ZPACK_COMPLETION
+    fi
+    unfunction __zpack_completion_apply
+}
+
+function __zpack_completion() {
+    __zpack subcmd completion $@
+}
+
+__zpack_completion $@

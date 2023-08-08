@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+
+function __zpack_compile() {
+    if [[ ! -f $file.zwc || $file -nt $file.zwc ]] && [[ -r $file ]]; then
+        if ! zcompile $opts $file; then
+            __zpack_err "Failed to compile $file"
+        fi
+    fi
+}
+
+function zpack-compile() {
+    local opts=()
+    zparseopts -a opts -D M R U k z || return 1
+
+    if [[ $# -eq 0 ]]; then
+        __zpack_err "'compile' requires at leat one parameter:"
+        __zpack_err "    zpack compile <location...>"
+    fi
+
+    local file
+    while [[ $# -gt 0 ]]; do
+        file=$1; shift
+        if [[ -f $file ]]; then
+            if [[ $file != *.zwc ]]; then
+                __zpack_compile
+            fi
+        else
+            __zpack_err "Could not compile invalid $file"
+        fi
+    done
+}
+
+zpack-compile $@

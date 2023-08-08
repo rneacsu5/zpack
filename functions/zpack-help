@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+
+function zpack-help() {
+    __zpack_out_plain "usage: 'zpack [command] [options]'"
+    __zpack_out_plain "    commands:"
+
+    local line
+    for line in "${(@f)$(< "$ZPACK_DIR/cmd.txt")}"; do
+        __zpack_out_plain "        ${line//_/ }"
+    done
+
+    __zpack_out_plain
+    __zpack_out_plain "Please check the zsh completion to find out more about the options of commands."
+}
+
+zpack-help $@

@@ -1,0 +1,208 @@
+#!/usr/bin/env zsh
+
+# Inspired by https://github.com/zdharma-continuum/zinit/blob/main/zinit-install.zsh
+
+function __zpack_release_hash() {
+    printf 'Version: %s\n' $version
+    printf 'Pattern: %s\n' $pattern
+}
+
+function __zpack_release_get_version() {
+    local repo=$1
+    local version
+
+    version=$(curl -sL https://github.com/$repo/releases/latest | sed -En "s:.*href=\"/$repo/releases/tag/([^\"]+)\".*:\1:p")
+    print ${version:t}
+}
+
+function __zpack_release_get_assets() {
+    local repo=$1
+    local version=$2
+    local assets
+
+    assets=$(curl -sL https://github.com/$repo/releases/expanded_assets/$version | sed -En "s:.*href=\"(/$repo/releases/download/$version/[^\"]+)\".*:\1:p")
+    print $assets
+}
+
+function __zpack_release_filter_junk() {
+    local filter="^(*(md5|sig|asc|txt|vsix|sum|sha256|pkg)*|*.(apk|deb|json|rpm|sh))"
+
+    __zpack_release_filter_pattern $filter $@
+}
+
+function __zpack_release_filter_os() {
+    local os=$(uname -s)
+    local filter="*"
+
+    case $os in
+        (Darwin)
+            filter='*(apple|darwin|apple-darwin|dmg|mac|macos|mac-os)*'
+        ;;
+        (Linux)
+            filter='*linux*'
+            set -- "${(f)$(__zpack_release_filter_pattern $filter $@)}"
+            filter='^*musl*'
+        ;;
+        (MINGW* | MSYS* | CYGWIN* | Windows_NT)
+            filter='*pc-windows-gnu*'
+        ;;
+        (*)
+            __zpack_warn "Unsupported OS: $os"
+        ;;
+    esac
+
+    __zpack_release_filter_pattern $filter $@
+}
+
+function __zpack_release_filter_arch() {
+    local arch=$(uname -m)
+    local filter="*"
+
+    case $arch in
+        (aarch64 | arm64)
+            filter='*(arm64|aarch64)*'
+        ;;
+        (amd64 | i386 | i486 | i686| i786 | x64 | x86 | x86-64 | x86_64)
+            filter='*(amd64|x86_64|x64)*'
+        ;;
+        (*)
+            __zpack_warn "Unsupported architecture: $arch"
+        ;;
+    esac
+
+    __zpack_release_filter_pattern $filter $@
+}
+
+function __zpack_release_filter_pattern() {
+    local asset found
+    local filter=$1
+    shift
+
+    for asset in $@; do
+        if [[ $asset == ${~filter} ]]; then
+            found=1
+            print $asset
+        fi
+    done
+
+    if [[ -z $found ]]; then
+        printf "%s\n" $@
+    fi
+}
+
+function zpack-release() {
+    local completion pattern list repo dir version assets
+    zparseopts -D -E -completion:=completion \
+        -pattern:=pattern p:=pattern \
+        -list=list l=list \
+        || return 1
+
+    if [[ $# == 0 ]]; then
+        __zpack_err "'release' requires at least one parameter:"
+        __zpack_err "    zpack release <repo> [--completion <cmd>]"
+        __zpack_err "                         [-p <pattern>] [--pattern <pattern>]"
+        __zpack_err "                         [-l] [--list]"
+        return 1
+    fi
+
+    repo=$1
+    if [[ -n $list ]]; then
+        # Just list available assets from latest version
+        __zpack_release_get_assets $repo $(__zpack_release_get_version $repo)
+        return
+    fi
+
+    if [[ -n $pattern ]]; then
+        pattern="${pattern[2]}"
+    else
+        pattern="*"
+    fi
+
+    dir=$(__zpack_dir release $repo)
+    [[ -d $dir ]] || mkdir -p $dir
+    ZPACK_RELEASES+=(${dir#$ZPACK_RELEASES_DIR/})
+
+    setopt localoptions extendedglob nullglob
+
+    # Check existing release
+    local version_file=$dir/.zpack_release_version
+    if [[ -f $version_file ]]; then
+        version=$(< $version_file)
+    else
+        # Get latest version
+        __zpack_out "Checking latest release version for $repo"
+        version=$(__zpack_release_get_version $repo)
+        if [[ $? -ne 0 ]] || [[ -z $version ]]; then
+            __zpack_err "Could not find a release for $repo."
+            return 1
+        fi
+        print $version > $version_file
+    fi
+
+    local hash_file=$dir/.zpack_release_hash
+    if ! ( [[ -f $hash_file ]] && [[ $(< $hash_file) = $(__zpack_release_hash) ]] ); then
+        # Remove old release
+        rm -dr $dir
+        mkdir -p $dir
+
+        __zpack_out "Installing $repo version $version"
+
+        assets=$(__zpack_release_get_assets $repo $version)
+        assets=$(__zpack_release_filter_junk ${(f)assets})
+        assets=$(__zpack_release_filter_os ${(f)assets})
+        assets=$(__zpack_release_filter_arch ${(f)assets})
+        assets=$(__zpack_release_filter_pattern $pattern ${(f)assets})
+        assets=(${(f)assets})
+
+        if [[ ${#assets} -eq 0 ]]; then
+            __zpack_err "No release found!"
+            return 1
+        fi
+
+        local asset=$assets[1]
+        __zpack_out "Downloading '${asset:t}'"
+        if ! curl -fL --progress-bar https://github.com/$asset -o "$dir/${asset:t}"; then
+            __zpack_err 'Could not download release'
+            return 1
+        fi
+
+        # Store release hash and version
+        __zpack_release_hash > $hash_file
+        print $version > $version_file
+
+        # Unpack tar and zip files
+        pushd -q $dir
+        local file
+        for file in *.tar.gz; do
+            __zpack_out "Extracting '$file'"
+            tar -xzf $file && rm $file
+        done
+        for file in *.zip; do
+            __zpack_out "Extracting '$file'"
+            unzip $file >/dev/null && rm $file
+        done
+        popd -q
+    fi
+
+    pushd -q $dir
+    # Add to bin
+    for file in **/*(*); do
+        zpack-bin ${file:A}
+    done
+    # Add completions
+    if [[ -n $completion ]]; then
+        if [[ -n $found ]]; then
+            __zpack_out "Generating completions..."
+            eval "$completion[2]"
+            if [[ $? -ne 0 ]]; then
+                __zpack_out "Failed to generate completions"
+                return 1
+            fi
+        fi
+        fpath=($dir $fpath)
+    fi
+    popd -q
+
+}
+
+zpack-release $@

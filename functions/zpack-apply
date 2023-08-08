@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+
+function zpack-apply() {
+
+    __zpack_completion apply
+
+    zpack-compile $ZPACK_DIR/zpack.zsh
+    zpack-compile $ZPACK_DIR/functions/*
+}
+
+zpack-apply $@

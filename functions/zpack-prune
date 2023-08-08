@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+function zpack-prune() {
+    local dir
+    for dir in $ZPACK_PLUGINS_DIR $ZPACK_RELEASES_DIR $ZPACK_SNIPPETS_DIR; do
+        __zpack_out "Deleting '$dir'..."
+        rm -drf "$dir"
+    done
+
+    zpack-reset $@
+}
+
+zpack-prune $@

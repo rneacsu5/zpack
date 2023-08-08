@@ -1,0 +1,41 @@
+#!/usr/bin/env zsh
+
+function zpack-list() {
+    local item
+    if [[ -n $ZPACK_PLUGINS ]]; then
+        __zpack_out_plain "Plugins:"
+        for item in $ZPACK_PLUGINS; do
+            __zpack_out_plain "    $item"
+        done
+    fi
+
+    if [[ -n $ZPACK_RELEASES ]]; then
+        __zpack_out_plain "Releases:"
+        for item in $ZPACK_RELEASES; do
+            __zpack_out_plain "    $item"
+        done
+    fi
+
+    if [[ -n $ZPACK_SNIPPETS ]]; then
+        __zpack_out_plain "Snippets:"
+        for item in $ZPACK_SNIPPETS; do
+            __zpack_out_plain "    $item"
+        done
+    fi
+
+    if [[ -n $ZPACK_BUNDLES ]]; then
+        __zpack_out_plain "Bundles:"
+        for item in $ZPACK_BUNDLES; do
+            __zpack_out_plain "    $item"
+        done
+    fi
+
+    if [[ -d $ZPACK_BIN_DIR ]]; then
+        __zpack_out_plain "Binaries:"
+        for item in $ZPACK_BIN_DIR/*; do
+            __zpack_out_plain "    ${item#$ZPACK_BIN_DIR/}"
+        done
+    fi
+}
+
+zpack-list $@

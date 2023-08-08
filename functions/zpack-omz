@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+
+function zpack-omz() {
+    local completion location repo
+    local opt_args=()
+    zparseopts -D -E -completion=completion || return 1
+
+    if [[ $# == 0 ]]; then
+        __zpack_err "'omz' requires at least one parameter:"
+        __zpack_err "    zpack omz <lib or plugin path> [--completion]"
+        return 1
+    fi
+
+    location=$1
+    repo=${ZPACK_OMZ_REPO:-ohmyzsh/ohmyzsh}
+    branch=$ZPACK_OMZ_BRANCH
+
+    if [[ -z $ZSH ]]; then
+        zpack-clone $repo $branch
+        ZSH="$(__zpack_dir plugin $repo $branch)"
+        ZSH_CACHE_DIR="$ZSH/cache"
+        ZSH_COMPLETIONS_DIR="$ZSH_CACHE_DIR/completions"
+        [[ -d $ZSH_COMPLETIONS_DIR ]] || mkdir -p $ZSH_COMPLETIONS_DIR
+        fpath=($ZSH_COMPLETIONS_DIR $fpath)
+    fi
+
+    if [[ $location == lib/* ]]; then
+        opt_args+=("--no-fpath")
+    fi
+
+    zpack-load $repo $location $branch $completion $opt_args
+}
+
+zpack-omz $@

@@ -1,0 +1,89 @@
+#!/usr/bin/env zsh
+
+function __zpack_bundle_omz-lib() {
+    zpack omz lib/git.zsh
+    zpack omz lib/history.zsh
+    zpack omz lib/directories.zsh
+    zpack omz lib/completion.zsh
+    zpack omz lib/vcs_info.zsh
+    zpack omz lib/prompt_info_functions.zsh
+    zpack omz lib/key-bindings.zsh
+    zpack omz lib/theme-and-appearance.zsh
+}
+
+function __zpack_bundle_fzf() {
+    local catppuccin preview
+    zparseopts -D -E -catppuccin=catppuccin -preview=preview || return 1
+
+    zpack release junegunn/fzf $@
+    zpack snippet https://github.com/junegunn/fzf/raw/master/shell/key-bindings.zsh
+
+    if [[ -n $catppuccin ]]; then
+        FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
+            --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+            --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+            --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
+            --prompt='∼ ' --pointer='▶' --marker='✓' \
+        "
+    fi
+    if [[ -n $preview ]]; then
+        FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '{ [[ -f {} ]] && bat -n --color=always {} } || { [[ -d {} ]] && exa --tree --icons {} }'"
+        FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
+    fi
+}
+
+function __zpack_bundle_bat() {
+    zpack release sharkdp/bat $@
+}
+
+function __zpack_bundle_exa() {
+    zpack release ogham/exa $@
+    zpack snippet https://github.com/ogham/exa/raw/master/completions/zsh/_exa
+}
+
+function __zpack_bundle_plow() {
+    zpack release six-ddc/plow $@
+    eval "$(plow --completion-script-zsh)"
+}
+
+function __zpack_bundle_zsh-users() {
+    zpack load zsh-users/zsh-autosuggestions
+    zpack load zsh-users/zsh-completions
+    zpack load zsh-users/zsh-syntax-highlighting
+    zpack load zsh-users/zsh-history-substring-search --after-load '
+        bindkey "$terminfo[kcuu1]" history-substring-search-up
+        bindkey "$terminfo[kcud1]" history-substring-search-down
+    '
+}
+
+function __zpack_bundle_powerlevel10k() {
+    zpack load romkatv/powerlevel10k powerlevel10k --after-load '
+        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+    '
+}
+
+
+function zpack-bundle() {
+
+    if [[ $# == 0 ]]; then
+        __zpack_out_plain "Available bundles:"
+        local fun
+        for fun in $(typeset -f +); do
+            [[ $fun = __zpack_bundle_* ]] && __zpack_out_plain "    ${fun#__zpack_bundle_}"
+        done
+        return
+    fi
+
+    local bundle=$1
+
+    if [[ ${+functions[__zpack_bundle_$bundle]} == 0 ]]; then
+        __zpack_err "Bundle does not exist. Run 'zpack bundle' to see available bundles."
+        return 1
+    fi
+
+    shift
+    __zpack_bundle_$bundle $@
+    ZPACK_BUNDLES+=($bundle)
+}
+
+zpack-bundle $@

@@ -1,0 +1,44 @@
+#!/usr/bin/env zsh
+
+function zpack-snippet() {
+    local completion location dir url bin
+
+    zparseopts -D -E -completion=completion -bin=bin \
+        || return 1
+
+    if [[ $# == 0 ]]; then
+        __zpack_err "'snippet' requires at least one parameter:"
+        __zpack_err "    zpack snippet <url> [--completion] [--bin]"
+        return 1
+    fi
+
+    url=$1
+    dir="$(__zpack_dir snippet $url)"
+    location="$dir/${url:t}"
+
+    if [[ -f $location ]]; then
+        # Snippet already exists, no need to download
+    else
+        mkdir -p $dir
+        __zpack_out "Downloading snippet ${location:t}"
+        if ! curl -fL --progress-bar "$url" -o "$location"; then
+            __zpack_err "Could not download snippet."
+            return 1
+        fi
+    fi
+
+    if [[ -n $completion || ${location:t} = _[^_]* ]]; then
+        fpath=($dir $fpath)
+    elif [[ -n $bin ]]; then
+        zpack-bin $location
+    elif [[ -f $location ]]; then
+        ZERO="$location" source $location
+    else
+        __zpack_err "Failed to load snippet ${location:t}."
+        return 1
+    fi
+
+    ZPACK_SNIPPETS+=( $url )
+}
+
+zpack-snippet $@

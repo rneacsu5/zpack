@@ -1,0 +1,63 @@
+#!/usr/bin/env zsh
+
+function __zpack_encode_url() {
+    # Remove characters from a url that don't work well in a filename.
+    # Inspired by -anti-get-clone-dir() method from antigen.
+    local url=$1
+    url=${url//\//-SLASH-}
+    url=${url//\:/-COLON-}
+    url=${url//\|/-PIPE-}
+    url=${url//~/-TILDE-}
+    print $url
+}
+
+function __zpack_dir_plugin() {
+    local repo=$1
+    local branch=${2:-__default}
+
+    if [[ -z $repo ]]; then
+        __zpack_err 'No repository given.'
+        return 1
+    fi
+
+    print "${ZPACK_PLUGINS_DIR}/$(__zpack_encode_url ${repo:h})/${repo:t}/$branch"
+}
+
+function __zpack_dir_release() {
+    local repo=$1
+
+    if [[ -z $repo ]]; then
+        __zpack_err 'No repository given.'
+        return 1
+    fi
+
+    print "${ZPACK_RELEASES_DIR}/$(__zpack_encode_url ${repo:h})/${repo:t}"
+}
+
+function __zpack_dir_snippet() {
+    local url=$1
+
+    if [[ -z $url ]]; then
+        __zpack_err 'No url given.'
+        return 1
+    fi
+
+    print "${ZPACK_SNIPPETS_DIR}/$(__zpack_encode_url ${url})"
+}
+
+function __zpack_dir_eval() {
+    local name=$1
+
+    if [[ -z $name ]]; then
+        __zpack_err 'No name given.'
+        return 1
+    fi
+
+    print "${ZPACK_PLUGINS_DIR}/__eval/$name"
+}
+
+function __zpack_dir() {
+    __zpack subcmd dir $@
+}
+
+__zpack_dir $@

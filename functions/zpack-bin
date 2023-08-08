@@ -1,0 +1,60 @@
+#!/usr/bin/env zsh
+
+function __zpack_bin() {
+    local file="${1}"
+    local name="${2:-${file:t}}"
+    local destination="$ZPACK_BIN_DIR/$name"
+
+    if [[ ! -e $destination ]]; then
+        chmod +x $file
+        ln -s $file $destination
+    fi
+}
+
+function __zpack_bins() {
+    setopt localoptions nullglob
+    for file in ${~1}(*); do
+        __zpack_bin $file
+    done
+}
+
+function zpack-bin() {
+    local location branch name
+    zparseopts -D -E -name:=name || return 1
+
+    local dir
+    if [[ $# == 0 ]]; then
+        __zpack_err "'bin' requires at least one parameter:"
+        __zpack_err "  zpack bin <repo> [location] [branch] [--name <name>]"
+        return
+    elif [[ $# == 1 && "${1[1]}" == '/' || "${1[1]}" == '.'  ]]; then
+        dir=$1
+    else
+        local repo=$1
+        branch=$3
+        dir="$(__zpack_dir plugin $repo $branch)"
+
+        zpack-clone $repo $branch
+    fi
+
+    location=${2%/}
+
+    if [[ -n $location ]]; then
+        location="$dir/$location"
+        if [[ -f "$location" ]]; then
+            __zpack_bin $location $name
+        elif [[ -d "$location" ]]; then
+            __zpack_bins "$location/*"
+        fi
+    elif [[ -f $dir ]]; then
+        __zpack_bin $dir $name
+    elif [[ -d "$dir/bin" ]]; then
+        __zpack_bins "$dir/bin/*"
+    elif [[ -d $dir ]]; then
+        __zpack_bins "$dir/*"
+    else
+        __zpack_err "Could not find valid binaries at '$dir'."
+    fi
+}
+
+zpack-bin $@

@@ -1,0 +1,68 @@
+#compdef zpack
+
+function _zpack_compile() {
+    local options=(
+        '-M[mark as mapped]'
+        '-R[mark as read]'
+        '-U[don'"'"'t expand aliases]'
+        '-k[ksh-style autoloading]'
+        '-z[zsh-style autoloading]'
+    )
+    _values -w options $options
+    _files
+}
+
+function _zpack_release() {
+	local options=(
+		'--completions[command to generate completions]'
+		'--pattern[glob pattern to match asset]'
+		'-p[glob pattern to match asset]'
+		'--list[list all availale releases and exit]'
+		'-l[list all availale releases and exit]'
+	)
+	_values -w options $options
+}
+
+
+function _zpack_snippet() {
+	local options=(
+		'--completion[only add to fpath]'
+		'--bin[add to path as binary]'
+	)
+	_values -w options $options
+}
+
+function _zpack_load() {
+	local options=(
+		'--completion[only add to fpath]'
+		'--no-fpath[do not add directory to fpath]'
+		'--before-load[command to run before load]'
+		'--after-load[command to run after load]'
+	)
+	_values -w options $options
+}
+
+function _zpack() {
+    _arguments '1: :->cmd' '*: :->opts'
+
+    case $state in
+        cmd)
+            local -a commands
+            local line
+            for line in "${(@f)$(< "$ZPACK_DIR/cmd.txt")}"; do
+                commands+=( "${line//_}" )
+            done
+            _describe 'command' commands
+            ;;
+        opts)
+            local subcmd=$words[2]
+            case $subcmd in
+                omz) _values -w options '--completion[only add to fpath]';;
+                bin) _values -w options '--name[define name (only when location is a file)]';;
+                *) [[ ${+functions[_zpack_$subcmd]} == 1 ]] && _zpack_$subcmd;;
+            esac
+            ;;
+    esac
+}
+
+_zpack $@

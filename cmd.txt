@@ -1,0 +1,15 @@
+load:__________clone and load plugin
+omz:___________load ohmyzsh plugins or libraries
+bin:___________clone and add files to PATH
+release:_______download and add binary release
+snippet:_______download and load snippet from url
+bundle:________load predefined bundles
+apply:_________apply setup to current shell
+update:________update all repositories, reset and restart shell
+selfupdate:____update zpack framework, reset and restart shell
+compile:_______compile files from the given path
+clone:_________clone plugin from repository
+list:__________print plugins, releases, snippets, bundles and binaries
+reset:_________delete cache and bin dirs and restart shell
+prune:_________delete everything and restart shell
+help:__________print usage information

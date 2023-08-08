@@ -1,0 +1,145 @@
+#!/usr/bin/env zsh
+
+function __zpack_path_contains() {
+    setopt localoptions nonomatch nocshnullglob nonullglob
+    [ -e "$1"/[^_]*"$2"(.,@[1]) ]
+}
+
+function __zpack_run_hook() {
+    local name=$1
+    local cmd=${(P)name}
+
+    if [[ -n $cmd ]]; then
+        pushd -q $dir
+        eval $cmd
+        popd -q
+    fi
+}
+
+function __zpack_source() {
+    local location=$1
+    local plugin_id
+
+    if [[ -z $repo ]]; then
+        plugin_id="/${${location:h}:t}"
+    elif [[ $repo = *ohmyzsh* ]]; then
+        plugin_id="$repo/$repo_path"
+    else
+        plugin_id=$repo
+    fi
+
+    if [[ -d "$dir/functions" ]]; then
+        __zpack_add_to_fpath "$dir/functions"
+    elif [[ $repo = *ohmyzsh* ]]; then
+        __zpack_add_to_fpath ${location:h}
+    else
+        __zpack_add_to_fpath $dir
+    fi
+
+    ZPACK_PLUGINS+=( $plugin_id )
+    zsh_loaded_plugins+=( $plugin_id )
+    ZERO="$location" source $location
+}
+
+function __zpack_add_to_fpath() {
+    if [[ -z $no_fpath ]]; then
+        fpath=($1 $fpath)
+    fi
+}
+
+function zpack-load() {
+    local completion no_fpath location dir repo repo_path branch
+    local before_load after_load
+    zparseopts -D -E -completion=completion -no-fpath=no_fpath \
+        -before-load:=before_load -after-load:=after_load \
+        || return 1
+
+    before_load=$before_load[2]
+    after_load=$after_load[2]
+
+    if [[ $# == 0 ]]; then
+        __zpack_err "'load' requires at least one parameter:"
+        __zpack_err "    zpack load <repo> [location] [branch]"
+        __zpack_err "                      [--completion] [--no-fpath]"
+        __zpack_err "                      [--before-load <cmd>] [--after-load <cmd>]"
+        return 1
+    elif [[ $# == 1 && ( "${1[1]}" == '/' || "${1[1]}" == '.' ) ]]; then
+        # Local file or directory
+        location=$1
+        if [[ -d $location ]]; then
+            dir=$location
+        else
+            dir=${location:h}
+        fi
+    else
+        # Remote repo
+        repo=$1
+        repo_path=$2
+        branch=$3
+
+        dir="$(__zpack_dir plugin $repo $branch)"
+        location="$dir/$repo_path"
+        location=${location%/}
+
+        zpack-clone $repo $branch
+    fi
+
+    __zpack_run_hook before_load
+
+    # Don't source, just fpath
+    if [[ -n $completion ]]; then
+        if [[ -d $location ]]; then
+            __zpack_add_to_fpath $location
+        elif [[ -f $location && -d ${location:h} ]]; then
+            __zpack_add_to_fpath ${location:h}
+        else
+            __zpack_err "Failed to add completion for $location"
+            return 1
+        fi
+
+        return
+    fi
+
+    # Source the file
+    if [[ -f "${location}" ]]; then
+        __zpack_source $location
+
+    elif [[ -f "${location}.zsh-theme" ]]; then
+        __zpack_source "${location}.zsh-theme"
+
+    elif [[ -f "${location}.theme.zsh" ]]; then
+        __zpack_source "${location}.theme.zsh"
+
+    elif [[ -f "${location}.zshplugin" ]]; then
+        __zpack_source "${location}.zshplugin"
+
+    elif [[ -f "${location}.zsh.plugin" ]]; then
+        __zpack_source "${location}.zsh.plugin"
+
+    # Classic ohmyzsh plugins have foo.plugin.zsh
+    elif __zpack_path_contains $location ".plugin.zsh" ; then
+        __zpack_source $location/*\.plugin\.zsh([1])
+
+    elif __zpack_path_contains $location ".zsh" ; then
+        __zpack_source $location/*\.zsh([1])
+
+    elif __zpack_path_contains $location ".sh" ; then
+        __zpack_source $location/*\.sh([1])
+
+    elif [[ -d "${location}" ]]; then
+        __zpack_add_to_fpath "${location}"
+
+    else
+        __zpack_err "Failed to load '$location'"
+        return 1
+    fi
+
+    # Binaries
+    if [[ -d "$dir/bin" ]]; then
+        zpack-bin $dir
+    fi
+
+    __zpack_run_hook after_load
+}
+
+zpack-load $@

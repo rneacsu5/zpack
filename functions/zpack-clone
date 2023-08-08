@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+
+function __zpack_clone_url() {
+    local repo=$1
+
+    # Sourced from antigen url resolution logic.
+    # https://github.com/zsh-users/antigen/blob/master/antigen.zsh
+    # Expand short github url syntax: `username/reponame`.
+    if [[ $repo != git://* &&
+            $repo != https://* &&
+            $repo != http://* &&
+            $repo != ssh://* &&
+            $repo != git@*:*/*
+            ]]; then
+        repo="https://github.com/${repo%.git}.git"
+    fi
+    print "$repo"
+
+}
+
+function zpack-clone() {
+    local repo=$1
+    local branch=$2
+    local url="$(__zpack_clone_url $repo)"
+    local dir="$(__zpack_dir plugin $repo $branch)"
+
+    if [[ -d "$dir" ]]; then
+        return # Already exists
+    else
+        mkdir -p "$dir"
+        if [[ -n $branch ]] && [[ ! $branch = '__default' ]]; then
+            git clone --depth=1 -b $branch $url $dir
+        else
+            git clone --depth=1 $url $dir
+        fi
+    fi
+}
+
+zpack-clone $@

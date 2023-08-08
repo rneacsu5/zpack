@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+
+function zpack-reset() {
+    if [[ -d $ZPACK_BIN_DIR ]]; then
+        __zpack_out "Deleting '$ZPACK_BIN_DIR'..."
+        rm -rf $ZPACK_BIN_DIR
+    fi
+    if [[ -d $ZPACK_CACHE_DIR ]]; then
+        __zpack_out "Deleting '$ZPACK_CACHE_DIR'..."
+        rm -rf $ZPACK_CACHE_DIR
+    fi
+    __zpack_out "Deleting compiled files..."
+    rm -f $ZPACK_DIR/functions/*.zwc(N)
+    rm -f $ZPACK_DIR/*.zwc(N)
+
+    __zpack_out "Restarting shell..."
+    exec $SHELL
+}
+
+zpack-reset $@

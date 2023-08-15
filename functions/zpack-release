@@ -90,6 +90,22 @@ function __zpack_release_filter_pattern() {
     fi
 }
 
+function __zpack_release_install() {
+    pushd -q $dir
+
+    # Add to bin
+    for file in **/*(*); do
+        zpack-bin ${file:A}
+    done
+
+    # Add completions
+    if [[ -n $completion ]]; then
+        fpath=($dir $fpath)
+    fi
+
+    popd -q
+}
+
 function zpack-release() {
     local completion pattern list repo dir version assets
     zparseopts -D -E -completion:=completion \
@@ -182,16 +198,12 @@ function zpack-release() {
             unzip $file >/dev/null && rm $file
         done
         popd -q
-    fi
 
-    pushd -q $dir
-    # Add to bin
-    for file in **/*(*); do
-        zpack-bin ${file:A}
-    done
-    # Add completions
-    if [[ -n $completion ]]; then
-        if [[ -n $found ]]; then
+        __zpack_release_install
+
+        # Generate completions
+        pushd -q $dir
+        if [[ -n $completion ]]; then
             __zpack_out "Generating completions..."
             eval "$completion[2]"
             if [[ $? -ne 0 ]]; then
@@ -199,10 +211,10 @@ function zpack-release() {
                 return 1
             fi
         fi
-        fpath=($dir $fpath)
+        popd -q
+    else
+        __zpack_release_install
     fi
-    popd -q
-
 }
 
 zpack-release $@

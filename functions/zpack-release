@@ -47,7 +47,7 @@ function __zpack_release_filter_os() {
             filter='*pc-windows-gnu*'
         ;;
         (*)
-            __zpack_warn "Unsupported OS: $os"
+            __zpack_warn "Unsupported OS '$os'"
         ;;
     esac
 
@@ -66,7 +66,7 @@ function __zpack_release_filter_arch() {
             filter='*(amd64|x86_64|x64)*'
         ;;
         (*)
-            __zpack_warn "Unsupported architecture: $arch"
+            __zpack_warn "Unsupported architecture '$arch'"
         ;;
     esac
 
@@ -146,10 +146,10 @@ function zpack-release() {
         version=$(< $version_file)
     else
         # Get latest version
-        __zpack_out "Checking latest release version for $repo"
+        __zpack_out "Checking latest release version for '$repo'"
         version=$(__zpack_release_get_version $repo)
         if [[ $? -ne 0 ]] || [[ -z $version ]]; then
-            __zpack_err "Could not find a release for $repo."
+            __zpack_err "Could not find a valid release."
             return 1
         fi
         print $version > $version_file
@@ -161,7 +161,7 @@ function zpack-release() {
         rm -dr $dir
         mkdir -p $dir
 
-        __zpack_out "Installing $repo version $version"
+        __zpack_out "Installing '$repo' version '$version'"
 
         assets=$(__zpack_release_get_assets $repo $version)
         assets=$(__zpack_release_filter_junk ${(f)assets})
@@ -171,14 +171,14 @@ function zpack-release() {
         assets=(${(f)assets})
 
         if [[ ${#assets} -eq 0 ]]; then
-            __zpack_err "No release found!"
+            __zpack_err "No release found."
             return 1
         fi
 
         local asset=$assets[1]
         __zpack_out "Downloading '${asset:t}'"
-        if ! curl -fL --progress-bar https://github.com/$asset -o "$dir/${asset:t}"; then
-            __zpack_err 'Could not download release'
+        if ! curl -sfL https://github.com/$asset -o "$dir/${asset:t}"; then
+            __zpack_err "Could not download release."
             return 1
         fi
 
@@ -204,10 +204,10 @@ function zpack-release() {
         # Generate completions
         pushd -q $dir
         if [[ -n $completion ]]; then
-            __zpack_out "Generating completions..."
+            __zpack_out "Generating completions"
             eval "$completion[2]"
             if [[ $? -ne 0 ]]; then
-                __zpack_out "Failed to generate completions"
+                __zpack_out "Failed to generate completions."
                 return 1
             fi
         fi

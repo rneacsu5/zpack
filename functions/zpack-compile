@@ -3,7 +3,7 @@
 function __zpack_compile() {
     if [[ ! -f $file.zwc || $file -nt $file.zwc ]] && [[ -r $file ]]; then
         if ! zcompile $opts $file; then
-            __zpack_err "Failed to compile $file"
+            __zpack_err "Failed to compile '$file'"
         fi
     fi
 }
@@ -25,7 +25,7 @@ function zpack-compile() {
                 __zpack_compile
             fi
         else
-            __zpack_err "Could not compile invalid $file"
+            __zpack_err "Could not compile invalid file '$file'"
         fi
     done
 }

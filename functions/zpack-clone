@@ -15,7 +15,6 @@ function __zpack_clone_url() {
         repo="https://github.com/${repo%.git}.git"
     fi
     print "$repo"
-
 }
 
 function zpack-clone() {
@@ -28,10 +27,11 @@ function zpack-clone() {
         return # Already exists
     else
         mkdir -p "$dir"
-        if [[ -n $branch ]] && [[ ! $branch = '__default' ]]; then
-            git clone --depth=1 -b $branch $url $dir
+        __zpack_out "Cloning '$repo'"
+        if [[ -n $branch ]] && [[ $branch != '__default' ]]; then
+            git clone --quiet --depth=1 --branch $branch $url $dir
         else
-            git clone --depth=1 $url $dir
+            git clone --quiet --depth=1 $url $dir
         fi
     fi
 }

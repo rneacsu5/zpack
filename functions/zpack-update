@@ -1,27 +1,41 @@
 #!/usr/bin/env zsh
 
 function zpack-update() {
-    local repo dir
+    local type=${1:-all}
 
-    for repo in $ZPACK_PLUGINS_DIR/**/.git(/F); do
-        dir="${repo%/.git}"
+    if [[ $# -gt 1 || $type != (all|self|plugins) ]]; then
+        __zpack_err "'update' requires at most one parameter:"
+        __zpack_err "    zpack update [all|self|plugins]"
+        return 1
+    fi
 
-        __zpack_out "Updating '${dir#$ZPACK_PLUGINS_DIR/}' ..."
+    if [[ $type == "all" || $type == "self" ]]; then
+        if [[ -e "$ZPACK_DIR/.git" ]]; then
+            __zpack_out "Updating ZPack"
+            git -C $ZPACK_DIR pull --ff-only
+        fi
+    fi
 
-        git -C $dir reset --hard --quiet
-        git -C $dir clean -df --quiet
-        git -C $dir pull  --ff-only
+    if [[ $type == "all" || $type == "plugins" ]]; then
+        local repo dir
+        for repo in $ZPACK_PLUGINS_DIR/**/.git(/F); do
+            dir="${repo%/.git}"
 
-        __zpack_out
-    done
+            __zpack_out "Updating '${${dir#$ZPACK_PLUGINS_DIR/}:h}'"
 
-    for version_file in $ZPACK_RELEASES_DIR/**/.zpack_release_version(.); do
-        rm "$version_file"
-    done
+            git -C $dir reset --hard --quiet
+            git -C $dir clean -df --quiet
+            git -C $dir pull  --ff-only
+        done
 
-    for snippet in $ZPACK_SNIPPETS_DIR/**/*(.); do
-        rm "$snippet"
-    done
+        for version_file in $ZPACK_RELEASES_DIR/**/.zpack_release_version(.); do
+            rm "$version_file"
+        done
+
+        for snippet in $ZPACK_SNIPPETS_DIR/**/*(.); do
+            rm "$snippet"
+        done
+    fi
 
     zpack-reset
 }

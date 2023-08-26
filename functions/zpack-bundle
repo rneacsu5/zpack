@@ -43,7 +43,11 @@ function __zpack_bundle_exa() {
 
 function __zpack_bundle_plow() {
     zpack release six-ddc/plow $@
-    eval "$(plow --completion-script-zsh)"
+    function plow() {
+        unfunction plow
+        eval "$(plow --completion-script-zsh)"
+        plow $@
+    }
 }
 
 function __zpack_bundle_zsh-users() {

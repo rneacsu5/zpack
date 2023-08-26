@@ -59,7 +59,7 @@ function __zpack_completion_apply() {
 }
 
 function __zpack_completion() {
-    __zpack subcmd completion $@
+    __zpack_subcmd completion $@
 }
 
 __zpack_completion $@

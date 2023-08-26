@@ -21,7 +21,7 @@ function __zpack_source() {
     local plugin_id
 
     if [[ -z $repo ]]; then
-        plugin_id="/${${location:h}:t}"
+        plugin_id=$dir
     elif [[ $repo = *ohmyzsh* ]]; then
         plugin_id="$repo/$repo_path"
     else
@@ -31,7 +31,9 @@ function __zpack_source() {
     if [[ -d "$dir/functions" ]]; then
         __zpack_add_to_fpath "$dir/functions"
     elif [[ $repo = *ohmyzsh* ]]; then
-        __zpack_add_to_fpath ${location:h}
+        if [[ $repo_path != lib/* ]]; then
+            __zpack_add_to_fpath ${location:h}
+        fi
     else
         __zpack_add_to_fpath $dir
     fi
@@ -42,15 +44,13 @@ function __zpack_source() {
 }
 
 function __zpack_add_to_fpath() {
-    if [[ -z $no_fpath ]]; then
-        fpath=($1 $fpath)
-    fi
+    fpath=($1 $fpath)
 }
 
 function zpack-load() {
-    local completion no_fpath location dir repo repo_path branch
+    local completion location dir repo repo_path branch
     local before_load after_load
-    zparseopts -D -E -completion=completion -no-fpath=no_fpath \
+    zparseopts -D -E -completion=completion \
         -before-load:=before_load -after-load:=after_load \
         || return 1
 
@@ -60,7 +60,7 @@ function zpack-load() {
     if [[ $# == 0 ]]; then
         __zpack_err "'load' requires at least one parameter:"
         __zpack_err "    zpack load <repo> [location] [branch]"
-        __zpack_err "                      [--completion] [--no-fpath]"
+        __zpack_err "                      [--completion]"
         __zpack_err "                      [--before-load <cmd>] [--after-load <cmd>]"
         return 1
     elif [[ $# == 1 && ( "${1[1]}" == '/' || "${1[1]}" == '.' ) ]]; then
@@ -93,7 +93,7 @@ function zpack-load() {
         elif [[ -f $location && -d ${location:h} ]]; then
             __zpack_add_to_fpath ${location:h}
         else
-            __zpack_err "Failed to add completion for $location"
+            __zpack_err "Failed to add completion for '$location'"
             return 1
         fi
 

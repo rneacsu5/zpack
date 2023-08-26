@@ -2,7 +2,6 @@
 
 function zpack-omz() {
     local completion location repo
-    local opt_args=()
     zparseopts -D -E -completion=completion || return 1
 
     if [[ $# == 0 ]]; then
@@ -24,11 +23,7 @@ function zpack-omz() {
         fpath=($ZSH_COMPLETIONS_DIR $fpath)
     fi
 
-    if [[ $location == lib/* ]]; then
-        opt_args+=("--no-fpath")
-    fi
-
-    zpack-load $repo $location $branch $completion $opt_args
+    zpack-load $repo $location $branch $completion
 }
 
 zpack-omz $@

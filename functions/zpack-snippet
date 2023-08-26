@@ -20,8 +20,8 @@ function zpack-snippet() {
         # Snippet already exists, no need to download
     else
         mkdir -p $dir
-        __zpack_out "Downloading snippet ${location:t}"
-        if ! curl -fL --progress-bar "$url" -o "$location"; then
+        __zpack_out "Downloading snippet '${location:t}'"
+        if ! curl -sfL "$url" -o "$location"; then
             __zpack_err "Could not download snippet."
             return 1
         fi
@@ -34,7 +34,7 @@ function zpack-snippet() {
     elif [[ -f $location ]]; then
         ZERO="$location" source $location
     else
-        __zpack_err "Failed to load snippet ${location:t}."
+        __zpack_err "Failed to load snippet '${location:t}'"
         return 1
     fi
 

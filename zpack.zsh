@@ -11,11 +11,11 @@ ZPACK_COMPDUMP_PATH="$ZPACK_CACHE_DIR/zcompdump_$ZSH_VERSION"
 fpath=($ZPACK_DIR/functions $fpath)
 (){
     setopt localoptions extendedglob
-    for func in $ZPACK_DIR/functions/zpack-*~*.zwc $ZPACK_DIR/functions/__zpack*~*.zwc; do
+    for func in $ZPACK_DIR/functions/zpack-*~*.zwc $ZPACK_DIR/functions/__zpack_*~*.zwc; do
         autoload -Uz ${func:t}
     done
 }
-__zpack init
+__zpack_init
 
 function zpack() {
     local cmd=$1

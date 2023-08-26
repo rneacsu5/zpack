@@ -21,15 +21,15 @@ function __zpack_subcmd() {
     local subcmd=$2
 
     if [[ -z $prefix ]]; then
-        __zpack_err 'No prefix given.'
+        __zpack_err "No prefix given."
         return 1
     fi
     if [[ -z $subcmd ]]; then
-        __zpack_err 'No subcommand given.'
+        __zpack_err "No subcommand given."
         return 1
     fi
     if [[ ${+functions[__zpack_${prefix}_${subcmd}]} == 0 ]]; then
-        __zpack_err 'Invalid subcomand given.'
+        __zpack_err "Invalid subcomand given."
         return 1
     fi
     shift 2
@@ -58,19 +58,4 @@ function __zpack_init() {
     __zpack_completion init
 }
 
-function __zpack() {
-    local subcmd=$1
-
-    if [[ -z $subcmd ]]; then
-        __zpack_err 'No subcommand given.'
-        return 1
-    fi
-    if [[ ${+functions[__zpack_${subcmd}]} == 0 ]]; then
-        __zpack_err 'Invalid subcomand given.'
-        return 1
-    fi
-    shift
-    __zpack_${subcmd} $@
-}
-
-__zpack $@
+__zpack_init $@

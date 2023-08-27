@@ -17,6 +17,7 @@ function __zpack_bundle_fzf() {
 
     zpack release junegunn/fzf $@
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/key-bindings.zsh
+    zpack snippet https://github.com/junegunn/fzf/raw/master/shell/completion.zsh
 
     if [[ -n $catppuccin ]]; then
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \

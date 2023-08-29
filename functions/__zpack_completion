@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
 
 function __zpack_completion_init {
+    unfunction __zpack_completion_init
+
     # Check if compinit was already run
     if [[ ${+_comps} == 1 && ${+_comp_options} == 1 ]]; then
         if [[ ${ZPACK_IGNORE_COMPINIT} != 1 ]]; then
@@ -23,10 +25,18 @@ function __zpack_completion_init {
             _ZPACK_COMPLETES+=("$*")
         }
     fi
-    unfunction __zpack_completion_init
+
+    # Style completion
+    zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
+    zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %d --%f'
+    zstyle ':completion:*:*:*:*:messages' format '%F{purple}-- %d --%f'
+    zstyle ':completion:*:*:*:*:warnings' format '%F{red}-- no matches found --%f'
+    zstyle ':completion:*' group-name ''
 }
 
 function __zpack_completion_apply() {
+    unfunction __zpack_completion_apply
+
     if [[ -n _ZPACK_COMPLETION ]]; then
         # Unmock completion
         unfunction compinit
@@ -55,7 +65,6 @@ function __zpack_completion_apply() {
         unset _ZPACK_COMPLETES
         unset _ZPACK_COMPLETION
     fi
-    unfunction __zpack_completion_apply
 }
 
 function __zpack_completion() {

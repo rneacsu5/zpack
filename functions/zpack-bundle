@@ -9,32 +9,48 @@ function __zpack_bundle_omz-lib() {
     zpack omz lib/prompt_info_functions.zsh
     zpack omz lib/key-bindings.zsh
     zpack omz lib/theme-and-appearance.zsh
+
+    # [Ctrl-Backspace] - delete whole backward-word
+    bindkey -M emacs '^H' backward-kill-word
+    bindkey -M viins '^H' backward-kill-word
+    bindkey -M vicmd '^H' backward-kill-word
 }
 
 function __zpack_bundle_fzf() {
-    local catppuccin preview
-    zparseopts -D -E -catppuccin=catppuccin -preview=preview || return 1
+    local preview
+    zparseopts -D -E -preview=preview || return 1
 
     zpack release junegunn/fzf $@
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/key-bindings.zsh
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/completion.zsh
 
+    FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --prompt='∼ ' --pointer='▶' --marker='✓'"
     if [[ -n $catppuccin ]]; then
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
             --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
             --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
             --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
-            --prompt='∼ ' --pointer='▶' --marker='✓' \
         "
     fi
+
     if [[ -n $preview ]]; then
-        FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '{ [[ -f {} ]] && bat -n --color=always {} } || { [[ -d {} ]] && exa --tree --icons {} }'"
+        local cat_cmd tree_cmd
+        cat_cmd="cat"
+        [[ $+commands[bat] == 1 ]] && cat_cmd="bat -n --color=always"
+        tree_cmd="ls -l"
+        [[ $+commands[tree] == 1 ]] && tree_cmd="tree"
+        [[ $+commands[exa] == 1 ]] && tree_cmd="exa --tree --icons"
+
+        FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '{ [[ -f {} ]] && $cat_cmd {} } || { [[ -d {} ]] && $tree_cmd {} }'"
         FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
     fi
 }
 
 function __zpack_bundle_bat() {
     zpack release sharkdp/bat $@
+
+    # Also follow instructions from https://github.com/catppuccin/bat
+    [[ -n $catppuccin ]] && export BAT_THEME="Catppuccin-mocha"
 }
 
 function __zpack_bundle_exa() {
@@ -54,7 +70,10 @@ function __zpack_bundle_plow() {
 function __zpack_bundle_zsh-users() {
     zpack load zsh-users/zsh-autosuggestions
     zpack load zsh-users/zsh-completions
+
+    [[ -n $catppuccin ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
     zpack load zsh-users/zsh-syntax-highlighting
+
     zpack load zsh-users/zsh-history-substring-search --after-load '
         bindkey "$terminfo[kcuu1]" history-substring-search-up
         bindkey "$terminfo[kcud1]" history-substring-search-down
@@ -69,6 +88,8 @@ function __zpack_bundle_powerlevel10k() {
 
 
 function zpack-bundle() {
+    local catppuccin
+    zparseopts -D -E -catppuccin=catppuccin || return 1
 
     if [[ $# == 0 ]]; then
         __zpack_out_plain "Available bundles:"

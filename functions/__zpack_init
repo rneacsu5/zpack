@@ -105,7 +105,7 @@ function __zpack_apply() {
 # Init function
 function __zpack_init() {
     # Check cache
-    if [[ -f $ZPACK_CACHE_FILE && $ZPACK_CACHE_FILE -nt $HOME/.zshrc ]]; then
+    if [[ -f $ZPACK_CACHE_FILE && $ZPACK_CACHE_FILE -nt ${ZDOTDIR:-$HOME}/.zshrc ]]; then
         ZPACK_CACHE=1
     else
         # Init Variables

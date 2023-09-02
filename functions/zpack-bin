@@ -8,6 +8,7 @@ function __zpack_bin() {
     if [[ ! -e $destination ]]; then
         chmod +x $file
         ln -s $file $destination
+        commands[$name]=$destination
     fi
 }
 

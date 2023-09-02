@@ -1,11 +1,18 @@
 #!/usr/bin/env zsh
 
 function zpack-apply() {
-
-    __zpack_completion apply
+    __zpack_cache_env ZPACK_PLUGINS
+    __zpack_cache_env ZPACK_SNIPPETS
+    __zpack_cache_env ZPACK_RELEASES
+    __zpack_cache_env ZPACK_BUNDLES
 
     zpack-compile $ZPACK_DIR/zpack.zsh
     zpack-compile $ZPACK_DIR/functions/*
+    zpack-compile $ZPACK_CACHE_FILE
+
+    __zpack_apply
+
+    zpack-compile $ZPACK_COMPDUMP_PATH
 }
 
 zpack-apply $@

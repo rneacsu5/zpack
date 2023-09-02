@@ -48,7 +48,6 @@ function __zpack_completion_apply() {
             __zpack_err "Could not initialise completions."
             return 1
         fi
-        zpack-compile $ZPACK_COMPDUMP_PATH
         autoload -Uz bashcompinit && bashcompinit
 
         # Apply definitions from mocks

@@ -3,22 +3,30 @@ ZPACK_DIR="$0:A:h"
 ZPACK_PLUGINS_DIR="$ZPACK_DIR/plugins"
 ZPACK_RELEASES_DIR="$ZPACK_DIR/releases"
 ZPACK_SNIPPETS_DIR="$ZPACK_DIR/snippets"
+ZPACK_FUNCTIONS_DIR="$ZPACK_DIR/functions"
 ZPACK_BIN_DIR="$ZPACK_DIR/bin"
 ZPACK_CACHE_DIR="$ZPACK_DIR/cache"
+ZPACK_CACHE_FILE="$ZPACK_CACHE_DIR/zpack"
 ZPACK_COMPDUMP_PATH="$ZPACK_CACHE_DIR/zcompdump_$ZSH_VERSION"
 
-# Load zpack functions
-fpath=($ZPACK_DIR/functions $fpath)
-(){
-    setopt localoptions extendedglob
-    for func in $ZPACK_DIR/functions/zpack-*~*.zwc $ZPACK_DIR/functions/__zpack_*~*.zwc; do
-        autoload -Uz ${func:t}
-    done
-}
+# Init ZPack
+fpath=($ZPACK_FUNCTIONS_DIR $fpath)
+autoload -Uz __zpack_init
 __zpack_init
 
 function zpack() {
     local cmd=$1
+
+    if [[ -n $ZPACK_CACHE ]]; then
+        [[ $cmd == apply ]] && __zpack_apply
+        return 0
+    fi
+
+    # Load all ZPack functions
+    if [[ ${+functions[zpack-help]} == 0 ]]; then
+        setopt localoptions extendedglob
+        autoload -Uz $ZPACK_FUNCTIONS_DIR/zpack-*~*.zwc $ZPACK_FUNCTIONS_DIR/__zpack_*~*.zwc
+    fi
 
     if [[ -z $cmd || $cmd = '--help' || $cmd = '-h' ]]; then
         zpack-help

@@ -100,7 +100,7 @@ function __zpack_release_install() {
 
     # Add completions
     if [[ -n $completion ]]; then
-        fpath=($dir $fpath)
+        __zpack_fpath $dir
     fi
 
     popd -q

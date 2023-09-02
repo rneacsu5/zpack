@@ -28,11 +28,11 @@ function zpack-snippet() {
     fi
 
     if [[ -n $completion || ${location:t} = _[^_]* ]]; then
-        fpath=($dir $fpath)
+        __zpack_fpath $dir
     elif [[ -n $bin ]]; then
         zpack-bin $location
     elif [[ -f $location ]]; then
-        ZERO="$location" source $location
+        __zpack_source $location
     else
         __zpack_err "Failed to load snippet '${location:t}'"
         return 1

@@ -4,16 +4,16 @@ function __zpack_bundle_omz-lib() {
     zpack omz lib/git.zsh
     zpack omz lib/history.zsh
     zpack omz lib/directories.zsh
-    zpack omz lib/completion.zsh
+    zpack omz lib/completion.zsh --after-load '
+        # [Ctrl-Backspace] - delete whole backward-word
+        bindkey -M emacs "^H" backward-kill-word
+        bindkey -M viins "^H" backward-kill-word
+        bindkey -M vicmd "^H" backward-kill-word
+    '
     zpack omz lib/vcs_info.zsh
     zpack omz lib/prompt_info_functions.zsh
     zpack omz lib/key-bindings.zsh
     zpack omz lib/theme-and-appearance.zsh
-
-    # [Ctrl-Backspace] - delete whole backward-word
-    bindkey -M emacs '^H' backward-kill-word
-    bindkey -M viins '^H' backward-kill-word
-    bindkey -M vicmd '^H' backward-kill-word
 }
 
 function __zpack_bundle_fzf() {
@@ -34,23 +34,30 @@ function __zpack_bundle_fzf() {
     fi
 
     if [[ -n $preview ]]; then
-        local cat_cmd tree_cmd
-        cat_cmd="cat"
+        local cat_cmd="cat"
+        local tree_cmd="ls -l"
+
         [[ $+commands[bat] == 1 ]] && cat_cmd="bat -n --color=always"
-        tree_cmd="ls -l"
         [[ $+commands[tree] == 1 ]] && tree_cmd="tree"
         [[ $+commands[exa] == 1 ]] && tree_cmd="exa --tree --icons"
 
         FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '{ [[ -f {} ]] && $cat_cmd {} } || { [[ -d {} ]] && $tree_cmd {} }'"
         FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
     fi
+
+    __zpack_cache_env FZF_DEFAULT_OPTS
+    __zpack_cache_env FZF_CTRL_T_OPTS
+    __zpack_cache_env FZF_ALT_C_OPTS
 }
 
 function __zpack_bundle_bat() {
     zpack release sharkdp/bat $@
 
     # Also follow instructions from https://github.com/catppuccin/bat
-    [[ -n $catppuccin ]] && export BAT_THEME="Catppuccin-mocha"
+    [[ -n $catppuccin ]] && {
+        export BAT_THEME="Catppuccin-mocha"
+        __zpack_cache "export BAT_THEME=\"Catppuccin-mocha\""
+    }
 }
 
 function __zpack_bundle_exa() {

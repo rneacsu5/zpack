@@ -5,18 +5,7 @@ function __zpack_path_contains() {
     [ -e "$1"/[^_]*"$2"(.,@[1]) ]
 }
 
-function __zpack_run_hook() {
-    local name=$1
-    local cmd=${(P)name}
-
-    if [[ -n $cmd ]]; then
-        pushd -q $dir
-        eval $cmd
-        popd -q
-    fi
-}
-
-function __zpack_source() {
+function __zpack_plugin_source() {
     local location=$1
     local plugin_id
 
@@ -29,22 +18,18 @@ function __zpack_source() {
     fi
 
     if [[ -d "$dir/functions" ]]; then
-        __zpack_add_to_fpath "$dir/functions"
+        __zpack_fpath "$dir/functions"
     elif [[ $repo = *ohmyzsh* ]]; then
         if [[ $repo_path != lib/* ]]; then
-            __zpack_add_to_fpath ${location:h}
+            __zpack_fpath ${location:h}
         fi
     else
-        __zpack_add_to_fpath $dir
+        __zpack_fpath $dir
     fi
 
     ZPACK_PLUGINS+=( $plugin_id )
-    zsh_loaded_plugins+=( $plugin_id )
-    ZERO="$location" source $location
-}
 
-function __zpack_add_to_fpath() {
-    fpath=($1 $fpath)
+    __zpack_source $location $plugin_id
 }
 
 function zpack-load() {
@@ -89,9 +74,9 @@ function zpack-load() {
     # Don't source, just fpath
     if [[ -n $completion ]]; then
         if [[ -d $location ]]; then
-            __zpack_add_to_fpath $location
+            __zpack_fpath $location
         elif [[ -f $location && -d ${location:h} ]]; then
-            __zpack_add_to_fpath ${location:h}
+            __zpack_fpath ${location:h}
         else
             __zpack_err "Failed to add completion for '$location'"
             return 1
@@ -102,32 +87,32 @@ function zpack-load() {
 
     # Source the file
     if [[ -f "${location}" ]]; then
-        __zpack_source $location
+        __zpack_plugin_source $location
 
     elif [[ -f "${location}.zsh-theme" ]]; then
-        __zpack_source "${location}.zsh-theme"
+        __zpack_plugin_source "${location}.zsh-theme"
 
     elif [[ -f "${location}.theme.zsh" ]]; then
-        __zpack_source "${location}.theme.zsh"
+        __zpack_plugin_source "${location}.theme.zsh"
 
     elif [[ -f "${location}.zshplugin" ]]; then
-        __zpack_source "${location}.zshplugin"
+        __zpack_plugin_source "${location}.zshplugin"
 
     elif [[ -f "${location}.zsh.plugin" ]]; then
-        __zpack_source "${location}.zsh.plugin"
+        __zpack_plugin_source "${location}.zsh.plugin"
 
     # Classic ohmyzsh plugins have foo.plugin.zsh
     elif __zpack_path_contains $location ".plugin.zsh" ; then
-        __zpack_source $location/*\.plugin\.zsh([1])
+        __zpack_plugin_source $location/*\.plugin\.zsh([1])
 
     elif __zpack_path_contains $location ".zsh" ; then
-        __zpack_source $location/*\.zsh([1])
+        __zpack_plugin_source $location/*\.zsh([1])
 
     elif __zpack_path_contains $location ".sh" ; then
-        __zpack_source $location/*\.sh([1])
+        __zpack_plugin_source $location/*\.sh([1])
 
     elif [[ -d "${location}" ]]; then
-        __zpack_add_to_fpath "${location}"
+        __zpack_fpath "${location}"
 
     else
         __zpack_err "Failed to load '$location'"

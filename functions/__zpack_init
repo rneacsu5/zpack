@@ -23,12 +23,16 @@ function __zpack_cache() {
     printf "%s\n" "$*" >>$ZPACK_CACHE_FILE
 }
 
-function __zpack_cache_env() {
+function __zpack_cache_var() {
     if [[ ${(Pt)1} = array* ]]; then
         __zpack_cache "$1=( ${(Pq-@)1} )"
     else
         __zpack_cache "$1=${(Pq-)1}"
     fi
+}
+
+function __zpack_cache_func() {
+    __zpack_cache "$(type -f $1)"
 }
 
 
@@ -90,8 +94,10 @@ function __zpack_subcmd() {
 }
 
 function __zpack_apply() {
-    unset ZPACK_CACHE
-    source $ZPACK_CACHE_FILE
+    if [[ -n $ZPACK_CACHE ]]; then
+        unset ZPACK_CACHE
+        source $ZPACK_CACHE_FILE
+    fi
     __zpack_completion apply
 }
 
@@ -120,7 +126,7 @@ function __zpack_init() {
         # Zsh Plugin Standard
         PMSPEC=0fbis
         typeset -ga zsh_loaded_plugins
-        __zpack_cache_env PMSPEC
+        __zpack_cache_var PMSPEC
         __zpack_cache "typeset -ga zsh_loaded_plugins"
     fi
 

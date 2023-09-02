@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 
 function zpack-apply() {
-    __zpack_cache_env ZPACK_PLUGINS
-    __zpack_cache_env ZPACK_SNIPPETS
-    __zpack_cache_env ZPACK_RELEASES
-    __zpack_cache_env ZPACK_BUNDLES
+    __zpack_cache_var ZPACK_PLUGINS
+    __zpack_cache_var ZPACK_SNIPPETS
+    __zpack_cache_var ZPACK_RELEASES
+    __zpack_cache_var ZPACK_BUNDLES
 
     zpack-compile $ZPACK_DIR/zpack.zsh
     zpack-compile $ZPACK_DIR/functions/*

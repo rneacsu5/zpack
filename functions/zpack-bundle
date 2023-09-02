@@ -45,9 +45,9 @@ function __zpack_bundle_fzf() {
         FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
     fi
 
-    __zpack_cache_env FZF_DEFAULT_OPTS
-    __zpack_cache_env FZF_CTRL_T_OPTS
-    __zpack_cache_env FZF_ALT_C_OPTS
+    __zpack_cache_var FZF_DEFAULT_OPTS
+    __zpack_cache_var FZF_CTRL_T_OPTS
+    __zpack_cache_var FZF_ALT_C_OPTS
 }
 
 function __zpack_bundle_bat() {
@@ -72,6 +72,7 @@ function __zpack_bundle_plow() {
         eval "$(plow --completion-script-zsh)"
         plow $@
     }
+    __zpack_cache_func plow
 }
 
 function __zpack_bundle_zsh-users() {

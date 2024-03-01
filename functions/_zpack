@@ -15,6 +15,8 @@ function _zpack_release() {
 		'--completion[command to generate completions]' \
 		'--pattern[glob pattern to match asset]' \
 		'-p[glob pattern to match asset]' \
+		'--filter[glob pattern to filter binary file]' \
+		'-f[glob pattern to filter binary file]' \
 		'--list[list all availale releases and exit]' \
 		'-l[list all availale releases and exit]'
 }

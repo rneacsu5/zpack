@@ -90,13 +90,30 @@ function __zpack_release_filter_pattern() {
     fi
 }
 
+function __zpack_release_install_pattern() {
+    local found
+    local pattern=$1
+
+    for file in ${~pattern}; do
+        zpack-bin ${file:A}
+        found=1
+    done
+
+    [[ -n $found ]]
+}
+
 function __zpack_release_install() {
     pushd -q $dir
 
-    # Add to bin
-    for file in **/*(*); do
-        zpack-bin ${file:A}
-    done
+    if ! { [[ -n $filter ]] && __zpack_release_install_pattern "${filter[2]}"  ||
+        __zpack_release_install_pattern "**/${name}(*)" ||
+        __zpack_release_install_pattern "**/${name}" ||
+        __zpack_release_install_pattern "**/*${name}*(*)" ||
+        __zpack_release_install_pattern "**/*${name}*" ||
+        __zpack_release_install_pattern "**/*(*)" }; then
+        __zpack_err "No release found."
+        return 1
+    fi
 
     # Add completions
     if [[ -n $completion ]]; then
@@ -107,9 +124,10 @@ function __zpack_release_install() {
 }
 
 function zpack-release() {
-    local completion pattern list repo dir version assets
+    local completion pattern list repo dir version assets filter name
     zparseopts -D -E -completion:=completion \
         -pattern:=pattern p:=pattern \
+        -filter:=filter f:=filter \
         -list=list l=list \
         || return 1
 
@@ -117,6 +135,7 @@ function zpack-release() {
         __zpack_err "'release' requires at least one parameter:"
         __zpack_err "    zpack release <repo> [--completion <cmd>]"
         __zpack_err "                         [-p <pattern>] [--pattern <pattern>]"
+        __zpack_err "                         [-f <filter>] [--filter <filter>]"
         __zpack_err "                         [-l] [--list]"
         return 1
     fi
@@ -136,7 +155,9 @@ function zpack-release() {
 
     dir=$(__zpack_dir release $repo)
     [[ -d $dir ]] || mkdir -p $dir
-    ZPACK_RELEASES+=(${dir#$ZPACK_RELEASES_DIR/})
+    name=${dir#$ZPACK_RELEASES_DIR/}
+    ZPACK_RELEASES+=($name)
+    name=${name:t}
 
     setopt localoptions extendedglob nullglob
 

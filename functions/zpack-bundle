@@ -94,6 +94,10 @@ function __zpack_bundle_powerlevel10k() {
     '
 }
 
+function __zpack_bundle_chezmoi() {
+    zpack release twpayne/chezmoi --completion 'chezmoi completion zsh > _chezmoi'
+}
+
 
 function zpack-bundle() {
     local catppuccin

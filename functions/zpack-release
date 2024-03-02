@@ -207,17 +207,24 @@ function zpack-release() {
         __zpack_release_hash > $hash_file
         print $version > $version_file
 
-        # Unpack tar and zip files
         pushd -q $dir
-        local file
+        # Unpack tar and zip files
+        local file archive
         for file in *.tar.gz; do
             __zpack_out "Extracting '$file'"
             tar -xzf $file && rm $file
+            archive=1
         done
         for file in *.zip; do
             __zpack_out "Extracting '$file'"
             unzip $file >/dev/null && rm $file
+            archive=1
         done
+
+        # If no archive present, assume it is a binary
+        if [[ -z $archive ]]; then
+            mv ${asset:t} $name
+        fi
         popd -q
 
         __zpack_release_install

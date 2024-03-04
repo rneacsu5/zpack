@@ -21,14 +21,15 @@ function __zpack_bins() {
 
 function zpack-bin() {
     local location branch name
-    zparseopts -D -E -name:=name || return 1
+    zparseopts -D -E -name:=name n:=name || return 1
 
     local dir
     if [[ $# == 0 ]]; then
         __zpack_err "'bin' requires at least one parameter:"
-        __zpack_err "  zpack bin <repo> [location] [branch] [--name <name>]"
+        __zpack_err "  zpack bin <repo> [location] [branch]"
+        __zpack_err "                   [-n <name>] [--name <name>]"
         return
-    elif [[ $# == 1 && "${1[1]}" == '/' || "${1[1]}" == '.'  ]]; then
+    elif [[ $# == 1 && ( "${1[1]}" == '/' || "${1[1]}" == '.' ) ]]; then
         dir=$1
     else
         local repo=$1
@@ -39,6 +40,9 @@ function zpack-bin() {
     fi
 
     location=${2%/}
+    if [[ -n $name ]]; then
+        name="${name[2]}"
+    fi
 
     if [[ -n $location ]]; then
         location="$dir/$location"

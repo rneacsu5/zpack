@@ -17,6 +17,8 @@ function _zpack_release() {
 		'-p[glob pattern to match asset]' \
 		'--filter[glob pattern to filter binary file]' \
 		'-f[glob pattern to filter binary file]' \
+		'--name[binary name]' \
+		'-n[binary name]' \
 		'--list[list all availale releases and exit]' \
 		'-l[list all availale releases and exit]'
 }
@@ -41,7 +43,8 @@ function _zpack_omz() {
 
 function _zpack_bin() {
     _values -w options \
-        '--name[define name (only when location is a file)]'
+        '--name[binary name (only when location is a file)]' \
+        '-n[binary name (only when location is a file)]'
 }
 
 function _zpack_update() {

@@ -5,6 +5,8 @@
 function __zpack_release_hash() {
     printf 'Version: %s\n' $version
     printf 'Pattern: %s\n' $pattern
+    printf 'Filter: %s\n' $filter
+    printf 'Name: %s\n' $name
 }
 
 function __zpack_release_get_version() {
@@ -95,7 +97,7 @@ function __zpack_release_install_pattern() {
     local pattern=$1
 
     for file in ${~pattern}; do
-        zpack-bin ${file:A}
+        zpack-bin --name $name ${file:A}
         found=1
     done
 
@@ -124,10 +126,11 @@ function __zpack_release_install() {
 }
 
 function zpack-release() {
-    local completion pattern list repo dir version assets filter name
+    local completion pattern list repo dir version assets filter name id
     zparseopts -D -E -completion:=completion \
         -pattern:=pattern p:=pattern \
         -filter:=filter f:=filter \
+        -name:=name n:=name \
         -list=list l=list \
         || return 1
 
@@ -136,6 +139,7 @@ function zpack-release() {
         __zpack_err "    zpack release <repo> [--completion <cmd>]"
         __zpack_err "                         [-p <pattern>] [--pattern <pattern>]"
         __zpack_err "                         [-f <filter>] [--filter <filter>]"
+        __zpack_err "                         [-n <name>] [--name <name>]"
         __zpack_err "                         [-l] [--list]"
         return 1
     fi
@@ -155,9 +159,14 @@ function zpack-release() {
 
     dir=$(__zpack_dir release $repo)
     [[ -d $dir ]] || mkdir -p $dir
-    name=${dir#$ZPACK_RELEASES_DIR/}
-    ZPACK_RELEASES+=($name)
-    name=${name:t}
+    id=${dir#$ZPACK_RELEASES_DIR/}
+    ZPACK_RELEASES+=($id)
+
+    if [[ -n $name ]]; then
+        name="${name[2]}"
+    else
+        name=${id:t}
+    fi
 
     setopt localoptions extendedglob nullglob
 

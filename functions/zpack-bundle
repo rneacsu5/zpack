@@ -17,35 +17,49 @@ function __zpack_bundle_omz-lib() {
 }
 
 function __zpack_bundle_fzf() {
-    local preview
-    zparseopts -D -E -preview=preview || return 1
+    local preview tab
+    zparseopts -D -E -preview=preview -tab=tab || return 1
 
     zpack release junegunn/fzf $@
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/key-bindings.zsh
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/completion.zsh
 
-    FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --prompt='∼ ' --pointer='▶' --marker='✓'"
-    if [[ -n $catppuccin ]]; then
+    FZF_DEFAULT_OPTS="$ZPACK_FZF_DEFAULT_OPTS --prompt='∼ ' --pointer='▶' --marker='✓'"
+    if [[ $ZPACK_THEME = "catppuccin-mocha" ]]; then
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
             --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
             --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
             --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
         "
+        __zpack_zstyle ":fzf-tab:*" default-color $'\x1b[39m'
     fi
 
     if [[ -n $preview ]]; then
         local cat_cmd="cat"
         local tree_cmd="ls -l"
+        local tree_level=${ZPACK_FZF_TREE_LEVEL:-3}
+        local fzf_preview_cmd fzf_tab_preview_cmd
 
         [[ $+commands[bat] == 1 ]] && cat_cmd="bat -n --color=always"
-        [[ $+commands[tree] == 1 ]] && tree_cmd="tree"
-        [[ $+commands[exa] == 1 ]] && tree_cmd="exa --tree --icons"
+        [[ $+commands[tree] == 1 ]] && tree_cmd="tree -L $tree_level"
+        [[ $+commands[exa] == 1 ]] && tree_cmd="exa --tree --icons -L $tree_level"
 
-        FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '{ [[ -f {} ]] && $cat_cmd {} } || { [[ -d {} ]] && $tree_cmd {} }'"
+        fzf_preview_cmd="{ [[ -f {} ]] && $cat_cmd {} } || { [[ -d {} ]] && $tree_cmd {} }"
+        fzf_tab_preview_cmd=${fzf_preview_cmd//\{\}/\$realpath}
+
+        FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '$fzf_preview_cmd'"
         FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
     fi
+    if [[ -n $tab ]]; then
+        zpack load Aloxaf/fzf-tab
+        __zpack_zstyle ':completion:*:descriptions' format '[%d]'
+        __zpack_zstyle ':fzf-tab:complete:cd:*' fzf-preview $fzf_tab_preview_cmd
+        __zpack_zstyle ':fzf-tab:complete:cd:*' fzf-min-height 20
+        __zpack_zstyle ':fzf-tab:complete:ls:*' fzf-preview $fzf_tab_preview_cmd
+        __zpack_zstyle ':fzf-tab:complete:ls:*' fzf-min-height 20
+    fi
 
-    __zpack_cache_var FZF_DEFAULT_OPTS
+    __zpack_export FZF_DEFAULT_OPTS
     __zpack_cache_var FZF_CTRL_T_OPTS
     __zpack_cache_var FZF_ALT_C_OPTS
 }
@@ -53,10 +67,26 @@ function __zpack_bundle_fzf() {
 function __zpack_bundle_bat() {
     zpack release sharkdp/bat $@
 
-    # Also follow instructions from https://github.com/catppuccin/bat
-    [[ -n $catppuccin ]] && {
-        export BAT_THEME="Catppuccin-mocha"
-        __zpack_cache "export BAT_THEME=\"Catppuccin-mocha\""
+    # Handle themes
+    [[ $ZPACK_THEME = "catppuccin-mocha" ]] && {
+        BAT_THEME="Catppuccin Mocha"
+        __zpack_export BAT_THEME
+    }
+
+    [[ -n $BAT_THEME ]] && {
+        local bat_themes_dir bat_theme_file bat_theme_file_path
+
+        bat_themes_dir="$(bat --config-dir)/themes"
+        bat_theme_file="$BAT_THEME.tmTheme"
+        bat_theme_file_path="$bat_themes_dir/$bat_theme_file"
+
+        [[ -d $bat_themes_dir ]] || mkdir -p $bat_themes_dir
+        [[ -f $bat_theme_file_path ]] || {
+            __zpack_out "Downloading bat theme '$BAT_THEME'"
+            curl -sSfL "https://github.com/catppuccin/bat/raw/main/themes/${bat_theme_file// /%20}" \
+            -o "$bat_theme_file_path"
+            bat cache --build
+        }
     }
 }
 
@@ -79,7 +109,7 @@ function __zpack_bundle_zsh-users() {
     zpack load zsh-users/zsh-autosuggestions
     zpack load zsh-users/zsh-completions
 
-    [[ -n $catppuccin ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
+    [[ $ZPACK_THEME = "catppuccin-mocha" ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
     zpack load zsh-users/zsh-syntax-highlighting
 
     zpack load zsh-users/zsh-history-substring-search --after-load '
@@ -100,9 +130,6 @@ function __zpack_bundle_chezmoi() {
 
 
 function zpack-bundle() {
-    local catppuccin
-    zparseopts -D -E -catppuccin=catppuccin || return 1
-
     if [[ $# == 0 ]]; then
         __zpack_out_plain "Available bundles:"
         local fun

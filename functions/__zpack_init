@@ -47,6 +47,17 @@ function __zpack_fpath() {
     __zpack_cache "fpath=(${(q-)1} \$fpath)"
 }
 
+function __zpack_export() {
+    export $1
+    __zpack_cache_var $1
+    __zpack_cache "export $1"
+}
+
+function __zpack_zstyle() {
+    zstyle $1 $2 $3
+    __zpack_cache "zstyle ${(q-)1} ${(q-)2} ${(q-)3}"
+}
+
 function __zpack_source() {
     local location=$1
     local plugin_id=$2

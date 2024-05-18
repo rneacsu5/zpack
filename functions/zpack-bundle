@@ -25,6 +25,9 @@ function __zpack_bundle_fzf() {
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/completion.zsh
 
     FZF_DEFAULT_OPTS="$ZPACK_FZF_DEFAULT_OPTS --prompt='∼ ' --pointer='▶' --marker='✓'"
+    if [[ $CASE_SENSITIVE != true ]]; then
+        FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS -i"
+    fi
     if [[ $ZPACK_THEME = "catppuccin-mocha" ]]; then
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
             --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \

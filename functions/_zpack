@@ -1,74 +1,138 @@
 #compdef zpack
 
 function _zpack_compile() {
-    _values -w options \
+    _arguments : \
         '-M[mark as mapped]' \
         '-R[mark as read]' \
         '-U[don'"'"'t expand aliases]' \
         '-k[ksh-style autoloading]' \
-        '-z[zsh-style autoloading]'
-    _files
+        '-z[zsh-style autoloading]' \
+        '1:file:_files' \
+        '*::file:_files'
 }
 
 function _zpack_release() {
-	_values -w options \
-		'--completion[command to generate completions]' \
-		'--pattern[glob pattern to match asset]' \
-		'-p[glob pattern to match asset]' \
-		'--filter[glob pattern to filter binary file]' \
-		'-f[glob pattern to filter binary file]' \
-		'--name[binary name]' \
-		'-n[binary name]' \
-		'--list[list all availale releases and exit]' \
-		'-l[list all availale releases and exit]'
+	_arguments \
+		'(-l --list)--completion[command to generate completions]:command' \
+		'(-p --pattern -l --list)'{-p,--pattern}'[glob pattern to match asset]:pattern' \
+		'(-f --filter -l --list)'{-f,--filter}'[glob pattern to filter binary file]:filter' \
+		'(-n --name -l --list)'{-n,--name}'[binary name]:name' \
+		'(-)'{-l,--list}'[list all availale releases and exit]' \
+        '1:repository'
 }
 
 function _zpack_snippet() {
-	_values -w options \
+	_arguments \
         '--completion[only add to fpath]' \
-		'--bin[add to path as binary]'
+		'--bin[add to path as binary]' \
+        '1:snippet url:_urls'
 }
 
 function _zpack_load() {
-    _values -w options \
+    _arguments \
 		'--completion[only add to fpath]' \
-		'--before-load[command to run before load]' \
-		'--after-load[command to run after load]'
+		'--before-load[command to run before load]:command' \
+		'--after-load[command to run after load]:command' \
+        '1:repository or local path' \
+        '2:location to load' \
+        '3:branch or tag'
 }
 
 function _zpack_omz() {
-    _values -w options \
-        '--completion[only add to fpath]'
+    _arguments \
+        '--completion[only add to fpath]' \
+        '1:lib or plugin path'
 }
 
 function _zpack_bin() {
-    _values -w options \
-        '--name[binary name (only when location is a file)]' \
-        '-n[binary name (only when location is a file)]'
+    _arguments \
+        '(-n --name)'{-n,--name}'[binary name (only when location is a file)]:name' \
+        '1:repository or local path' \
+        '2:location to load' \
+        '3:branch or tag'
 }
 
 function _zpack_update() {
-    _arguments '1:scope:((all\:"update zpack and plugins" self\:"update zpack" plugins\:"update plugins"))'
+    _arguments \
+        '1:scope:((all\:"update zpack and plugins" self\:"update zpack" plugins\:"update plugins"))'
+}
+
+function _zpack_bundle() {
+    local context state state_descr line
+    typeset -A opt_args
+    local ret=1
+
+    _arguments \
+        '1: :->bundle' \
+        '*::arg:->args' \
+    && ret=0
+
+    case $state in
+        bundle)
+            _describe -t bundles "zpack bundles" __ZPACK_BUNDLES && ret=0
+            ;;
+        args)
+            local bundle=$words[1]
+            case $bundle in
+                zoxide)
+                    _arguments \
+                        '--cmd[change the command used to call zoxide]:command' \
+                    && ret=0
+                    ;;
+                fzf)
+                    _arguments \
+                        '--preview[enable preview for files and directories]' \
+                        '--tab[use fzf for tab completion (using Aloxaf/fzf-tab)]' \
+                    && ret=0
+                    ;;
+                *)
+                    if [[ $__ZPACK_BUNDLES[(Ie)$bundle] -gt 0 ]]; then
+                        _message 'no more arguments' && ret=0
+                    fi
+                    ;;
+            esac
+    esac
+
+    return $ret
+}
+
+function _zpack_clone() {
+    _arguments \
+        '1:repository' \
+        '2:branch or tag'
 }
 
 function _zpack() {
-    _arguments '1: :->cmd' '*:: :->subcmd'
+    local context state state_descr line
+    typeset -A opt_args
+    local ret=1
+
+    _arguments \
+        '(- : *)'{-h,--help}'[show help]' \
+        '1: :->cmd' \
+        '*::arg:->args' \
+    && ret=0
 
     case $state in
         cmd)
-            local -a commands opts
-            local line
-            for help_line in "${(@f)$(< "$ZPACK_DIR/cmd.txt")}"; do
-                commands+=( "${help_line//_}" )
+            local -a commands
+            local cmd
+            for cmd in ${(k)__ZPACK_CMDS}; do
+                commands+=( "${cmd}:${__ZPACK_CMDS[$cmd]}" )
             done
-            opts=("-h:show help" "--help:show help")
-            _describe commands commands
-            _describe options opts
+            _describe -t commands "zpack commands" commands && ret=0
             ;;
-        subcmd)
-            local subcmd=$line[1]
-            [[ ${+functions[_zpack_$subcmd]} == 1 ]] && _zpack_$subcmd;;
+        args)
+            local subcmd=$words[1]
+            if [[ ${+functions[_zpack_$subcmd]} == 1 ]]; then
+                _zpack_$subcmd && ret=0
+            elif [[ ${+__ZPACK_CMDS[$subcmd]} == 1 ]]; then
+                _message 'no more arguments' && ret=0
+            fi
+            ;;
     esac
+
+    return $ret
 }
 
 _zpack $@

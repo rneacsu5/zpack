@@ -131,13 +131,31 @@ function __zpack_bundle_chezmoi() {
     zpack release twpayne/chezmoi --completion 'chezmoi completion zsh > _chezmoi'
 }
 
+function __zpack_bundle_zoxide() {
+    local cmd
+    zparseopts -D -E -cmd:=cmd || return 1
+
+    zpack release ajeetdsouza/zoxide $@
+    if [[ -n $cmd ]]; then
+        ZOXIDE_CMD_OVERRIDE=$cmd[2]
+    fi
+    eval "$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)"
+}
+
+{
+    local fun
+    __ZPACK_BUNDLES=()
+    for fun in ${(k)functions}; do
+        [[ $fun = __zpack_bundle_* ]] && __ZPACK_BUNDLES+=( ${fun#__zpack_bundle_} )
+    done
+}
 
 function zpack-bundle() {
     if [[ $# == 0 ]]; then
         __zpack_out_plain "Available bundles:"
-        local fun
-        for fun in $(typeset -f +); do
-            [[ $fun = __zpack_bundle_* ]] && __zpack_out_plain "    ${fun#__zpack_bundle_}"
+        local bundle
+        for bundle in $__ZPACK_BUNDLES; do
+            __zpack_out_plain "    ${bundle}"
         done
         return
     fi

@@ -4,9 +4,9 @@ function zpack-help() {
     __zpack_out_plain "usage: 'zpack [command] [options]'"
     __zpack_out_plain "    commands:"
 
-    local line
-    for line in "${(@f)$(< "$ZPACK_DIR/cmd.txt")}"; do
-        __zpack_out_plain "        ${line//_/ }"
+    local cmd
+    for cmd in ${(k)__ZPACK_CMDS}; do
+        printf "        %-*s%s\n" 15 $cmd $__ZPACK_CMDS[$cmd]
     done
 
     __zpack_out_plain

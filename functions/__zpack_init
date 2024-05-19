@@ -139,26 +139,26 @@ function __zpack_init() {
         typeset -ga zsh_loaded_plugins
         __zpack_cache_var PMSPEC
         __zpack_cache "typeset -ga zsh_loaded_plugins"
-
-        # Define commands and their description
-        typeset -gA __ZPACK_CMDS
-        __ZPACK_CMDS=(
-            "load"    "clone and load plugin"
-            "omz"     "load ohmyzsh plugins or libraries"
-            "bin"     "clone and add files to PATH"
-            "release" "download and add binary release"
-            "snippet" "download and load snippet from url"
-            "bundle"  "load predefined bundles"
-            "apply"   "apply setup to current shell"
-            "update"  "update all repositories, reset and restart shell"
-            "compile" "compile files from the given path"
-            "clone"   "clone plugin from repository"
-            "list"    "print plugins, releases, snippets, bundles and binaries"
-            "reset"   "delete cache and bin dirs and restart shell"
-            "prune"   "delete everything and restart shell"
-            "help"    "print usage information"
-        )
     fi
+
+    # Define commands and their description
+    typeset -gA __ZPACK_CMDS
+    __ZPACK_CMDS=(
+        "load"    "clone and load plugin"
+        "omz"     "load ohmyzsh plugins or libraries"
+        "bin"     "clone and add files to PATH"
+        "release" "download and add binary release"
+        "snippet" "download and load snippet from url"
+        "bundle"  "load predefined bundles"
+        "apply"   "apply setup to current shell"
+        "update"  "update all repositories, reset and restart shell"
+        "compile" "compile files from the given path"
+        "clone"   "clone plugin from repository"
+        "list"    "print plugins, releases, snippets, bundles and binaries"
+        "reset"   "delete cache and bin dirs and restart shell"
+        "prune"   "delete everything and restart shell"
+        "help"    "print usage information"
+    )
 
     # Init completion
     autoload -Uz __zpack_completion

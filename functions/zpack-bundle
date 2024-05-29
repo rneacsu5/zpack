@@ -128,7 +128,11 @@ function __zpack_bundle_powerlevel10k() {
 }
 
 function __zpack_bundle_chezmoi() {
-    zpack release twpayne/chezmoi --completion 'chezmoi completion zsh > _chezmoi'
+    zpack release twpayne/chezmoi --completion 'chezmoi completion zsh > _chezmoi' $@
+}
+
+function __zpack_bundle_delta() {
+    zpack release dandavison/delta --completion 'delta --generate-completion zsh > _delta' $@
 }
 
 function __zpack_bundle_zoxide() {
@@ -140,6 +144,7 @@ function __zpack_bundle_zoxide() {
         ZOXIDE_CMD_OVERRIDE=$cmd[2]
     fi
     eval "$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)"
+    __zpack_cache "eval \"\$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)\""
 }
 
 {

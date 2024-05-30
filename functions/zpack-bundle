@@ -36,6 +36,14 @@ function __zpack_bundle_fzf() {
         "
         __zpack_zstyle ":fzf-tab:*" default-color $'\x1b[39m'
     fi
+    if [[ $ZPACK_THEME = "catppuccin-latte" ]]; then
+        FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
+            --color=bg+:#ccd0da,bg:#eff1f5,spinner:#dc8a78,hl:#d20f39 \
+            --color=fg:#4c4f69,header:#d20f39,info:#8839ef,pointer:#dc8a78 \
+            --color=marker:#dc8a78,fg+:#4c4f69,prompt:#8839ef,hl+:#d20f39 \
+        "
+        __zpack_zstyle ":fzf-tab:*" default-color $'\x1b[39m'
+    fi
 
     if [[ -n $preview ]]; then
         local cat_cmd="cat"
@@ -73,6 +81,10 @@ function __zpack_bundle_bat() {
     # Handle themes
     [[ $ZPACK_THEME = "catppuccin-mocha" ]] && {
         BAT_THEME="Catppuccin Mocha"
+        __zpack_export BAT_THEME
+    }
+    [[ $ZPACK_THEME = "catppuccin-latte" ]] && {
+        BAT_THEME="Catppuccin Latte"
         __zpack_export BAT_THEME
     }
 
@@ -113,6 +125,7 @@ function __zpack_bundle_zsh-users() {
     zpack load zsh-users/zsh-completions
 
     [[ $ZPACK_THEME = "catppuccin-mocha" ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
+    [[ $ZPACK_THEME = "catppuccin-latte" ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_latte-zsh-syntax-highlighting.zsh
     zpack load zsh-users/zsh-syntax-highlighting
 
     zpack load zsh-users/zsh-history-substring-search --after-load '

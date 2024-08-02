@@ -24,25 +24,9 @@ function __zpack_bundle_fzf() {
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/key-bindings.zsh
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/completion.zsh
 
-    FZF_DEFAULT_OPTS="$ZPACK_FZF_DEFAULT_OPTS --prompt='∼ ' --pointer='▶' --marker='✓'"
-    if [[ $CASE_SENSITIVE != true ]]; then
+    FZF_DEFAULT_OPTS="$ZPACK_FZF_DEFAULT_OPTS --prompt='~ ' --pointer='▶' --marker='✓' --color=16"
+    if [[ $ZPACK_FZF_CASE_SENSITIVE != true ]]; then
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS -i"
-    fi
-    if [[ $ZPACK_THEME = "catppuccin-mocha" ]]; then
-        FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-            --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
-            --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
-            --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
-        "
-        __zpack_zstyle ":fzf-tab:*" default-color $'\x1b[39m'
-    fi
-    if [[ $ZPACK_THEME = "catppuccin-latte" ]]; then
-        FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-            --color=bg+:#ccd0da,bg:#eff1f5,spinner:#dc8a78,hl:#d20f39 \
-            --color=fg:#4c4f69,header:#d20f39,info:#8839ef,pointer:#dc8a78 \
-            --color=marker:#dc8a78,fg+:#4c4f69,prompt:#8839ef,hl+:#d20f39 \
-        "
-        __zpack_zstyle ":fzf-tab:*" default-color $'\x1b[39m'
     fi
 
     if [[ -n $preview ]]; then
@@ -77,32 +61,8 @@ function __zpack_bundle_fzf() {
 
 function __zpack_bundle_bat() {
     zpack release sharkdp/bat $@
-
-    # Handle themes
-    [[ $ZPACK_THEME = "catppuccin-mocha" ]] && {
-        BAT_THEME="Catppuccin Mocha"
-        __zpack_export BAT_THEME
-    }
-    [[ $ZPACK_THEME = "catppuccin-latte" ]] && {
-        BAT_THEME="Catppuccin Latte"
-        __zpack_export BAT_THEME
-    }
-
-    [[ -n $BAT_THEME ]] && {
-        local bat_themes_dir bat_theme_file bat_theme_file_path
-
-        bat_themes_dir="$(bat --config-dir)/themes"
-        bat_theme_file="$BAT_THEME.tmTheme"
-        bat_theme_file_path="$bat_themes_dir/$bat_theme_file"
-
-        [[ -d $bat_themes_dir ]] || mkdir -p $bat_themes_dir
-        [[ -f $bat_theme_file_path ]] || {
-            __zpack_out "Downloading bat theme '$BAT_THEME'"
-            curl -sSfL "https://github.com/catppuccin/bat/raw/main/themes/${bat_theme_file// /%20}" \
-            -o "$bat_theme_file_path"
-            bat cache --build
-        }
-    }
+    BAT_THEME="base16"
+    __zpack_export BAT_THEME
 }
 
 function __zpack_bundle_exa() {
@@ -124,8 +84,6 @@ function __zpack_bundle_zsh-users() {
     zpack load zsh-users/zsh-autosuggestions
     zpack load zsh-users/zsh-completions
 
-    [[ $ZPACK_THEME = "catppuccin-mocha" ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
-    [[ $ZPACK_THEME = "catppuccin-latte" ]] && zpack snippet https://github.com/catppuccin/zsh-syntax-highlighting/raw/main/themes/catppuccin_latte-zsh-syntax-highlighting.zsh
     zpack load zsh-users/zsh-syntax-highlighting
 
     zpack load zsh-users/zsh-history-substring-search --after-load '
@@ -158,6 +116,12 @@ function __zpack_bundle_zoxide() {
     fi
     eval "$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)"
     __zpack_cache "eval \"\$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)\""
+}
+
+function __zpack_bundle_lazygit() {
+    zpack release jesseduffield/lazygit $@
+    alias lg='lazygit'
+    __zpack_cache "alias lg='lazygit'"
 }
 
 {

@@ -1,18 +1,9 @@
 #!/usr/bin/env zsh
 
 function __zpack_bundle_omz-lib() {
-    zpack omz lib/git.zsh
     zpack omz lib/history.zsh
     zpack omz lib/directories.zsh
-    zpack omz lib/completion.zsh --after-load '
-        # [Ctrl-Backspace] - delete whole backward-word
-        bindkey -M emacs "^H" backward-kill-word
-        bindkey -M viins "^H" backward-kill-word
-        bindkey -M vicmd "^H" backward-kill-word
-    '
-    zpack omz lib/vcs_info.zsh
-    zpack omz lib/prompt_info_functions.zsh
-    zpack omz lib/key-bindings.zsh
+    zpack omz lib/completion.zsh
     zpack omz lib/theme-and-appearance.zsh
 }
 

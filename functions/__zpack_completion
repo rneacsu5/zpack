@@ -12,18 +12,16 @@ function __zpack_completion_init {
     else
         # Mock completion
         _ZPACK_COMPDEFS=()
-        _ZPACK_COMPLETES=()
         _ZPACK_COMPLETION=1
 
         function compinit() {}
-        function bashcompinit() {}
-
         function compdef() {
-            _ZPACK_COMPDEFS+=("$*")
+            _ZPACK_COMPDEFS+=("${(j: :)${(q)@}}")
         }
-        function complete() {
-            _ZPACK_COMPLETES+=("$*")
-        }
+
+        # This only defined the 'compgen' and 'complete' functions which in turn
+        # use 'compdef', so no need to mock them.
+        autoload -Uz bashcompinit && bashcompinit
     fi
 
     # Style completion
@@ -40,7 +38,7 @@ function __zpack_completion_apply() {
     if [[ -n _ZPACK_COMPLETION ]]; then
         # Unmock completion
         unfunction compinit
-        unfunction bashcompinit
+        unfunction compdef
 
         # Load real completion
         autoload -Uz compinit && compinit -d $ZPACK_COMPDUMP_PATH
@@ -48,20 +46,18 @@ function __zpack_completion_apply() {
             __zpack_err "Could not initialise completions."
             return 1
         fi
-        autoload -Uz bashcompinit && bashcompinit
 
         # Apply definitions from mocks
         local comp
         for comp in $_ZPACK_COMPDEFS; do
-            eval "compdef $comp"
+            comp_args=("${(z)comp}")
+            comp_args=("${(Q)comp_args[@]}")
+            compdef "$comp_args[@]"
         done
-        for comp in $_ZPACK_COMPLETES; do
-            eval "complete $comp"
-        done
+        compdump
 
         # Cleanup
         unset _ZPACK_COMPDEFS
-        unset _ZPACK_COMPLETES
         unset _ZPACK_COMPLETION
     fi
 }

@@ -26,8 +26,11 @@ function __zpack_stats_calc_time() {
       (( plugins_time += time ))
     elif [[ $key = snippet_* ]]; then
       (( snippets_time += time ))
+    else
+      (( total_time += time ))
     fi
-    (( total_time += time ))
+  else
+    return 1
   fi
 }
 
@@ -69,13 +72,17 @@ function zpack-stats() {
     else
       print -P "  Cache hit: %F{red}no%f"
       __zpack_out_plain "  Cache build time: $(__zpack_stats_print_time $time)"
+      __zpack_stats_calc_time cache_compile && \
+      __zpack_out_plain "  Cache compile time: $(__zpack_stats_print_time $time)"
     fi
   fi
 
   __zpack_out_plain "Completions stats:"
-  __zpack_stats_calc_time "compinit" && \
-  __zpack_out_plain "  compinit time: $(__zpack_stats_print_time $time)"
   __zpack_out_plain "  compinit status: ${ZPACK_STATS[compinit_status]}"
+  __zpack_stats_calc_time compinit && \
+  __zpack_out_plain "  compinit time: $(__zpack_stats_print_time $time)"
+  __zpack_stats_calc_time compinit_compile && \
+  __zpack_out_plain "  compinit compile time: $(__zpack_stats_print_time $time)"
 
   __zpack_out_plain "Total time: $(__zpack_stats_print_time $total_time)"
 }

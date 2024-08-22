@@ -8,13 +8,17 @@ function zpack-apply() {
     __zpack_cache_var ZPACK_BINARIES
     __zpack_stats_time cache end
 
+    ZPACK_STATS[cache_compile_start]=$EPOCHREALTIME
     zpack-compile $ZPACK_DIR/zpack.zsh
     zpack-compile $ZPACK_DIR/functions/*
     zpack-compile $ZPACK_CACHE_FILE
+    ZPACK_STATS[cache_compile_end]=$EPOCHREALTIME
 
     __zpack_apply
 
+    ZPACK_STATS[compinit_compile_start]=$EPOCHREALTIME
     zpack-compile $ZPACK_COMPDUMP_PATH
+    ZPACK_STATS[compinit_compile_end]=$EPOCHREALTIME
 }
 
 zpack-apply $@

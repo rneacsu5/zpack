@@ -7,15 +7,6 @@ function __zpack_path_contains() {
 
 function __zpack_plugin_source() {
     local location=$1
-    local plugin_id
-
-    if [[ -z $repo ]]; then
-        plugin_id=$dir
-    elif [[ $repo = *ohmyzsh* ]]; then
-        plugin_id="$repo/$repo_path"
-    else
-        plugin_id=$repo
-    fi
 
     if [[ -d "$dir/functions" ]]; then
         __zpack_fpath "$dir/functions"
@@ -33,7 +24,7 @@ function __zpack_plugin_source() {
 }
 
 function zpack-load() {
-    local completion location dir repo repo_path branch
+    local completion location dir repo repo_path branch plugin_id
     local before_load after_load
     zparseopts -D -E -completion=completion \
         -before-load:=before_load -after-load:=after_load \
@@ -69,6 +60,15 @@ function zpack-load() {
         zpack-clone $repo $branch
     fi
 
+    if [[ -z $repo ]]; then
+        plugin_id=$dir
+    elif [[ $repo = *ohmyzsh* ]]; then
+        plugin_id="$repo/$repo_path"
+    else
+        plugin_id=$repo
+    fi
+
+    __zpack_stats_time "plugin_$plugin_id" start
     __zpack_run_hook before_load
 
     # Don't source, just fpath
@@ -125,6 +125,7 @@ function zpack-load() {
     fi
 
     __zpack_run_hook after_load
+    __zpack_stats_time "plugin_$plugin_id" end
 }
 
 zpack-load $@

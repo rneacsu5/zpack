@@ -30,10 +30,10 @@ function zpack-list() {
         done
     fi
 
-    if [[ -d $ZPACK_BIN_DIR ]]; then
+    if [[ -n $ZPACK_BINARIES ]]; then
         __zpack_out_plain "Binaries:"
-        for item in $ZPACK_BIN_DIR/*; do
-            __zpack_out_plain "    ${item#$ZPACK_BIN_DIR/}"
+        for item in $ZPACK_BINARIES; do
+            __zpack_out_plain "    $item"
         done
     fi
 }

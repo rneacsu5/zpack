@@ -84,6 +84,14 @@ function __zpack_run_hook() {
     fi
 }
 
+function __zpack_stats_time() {
+    local key=$1
+    local event=$2
+
+    ZPACK_STATS[${key}_${event}]=$EPOCHREALTIME
+    __zpack_cache "ZPACK_STATS[${key}_${event}]=\$EPOCHREALTIME"
+}
+
 function __zpack_subcmd() {
     local prefix=$1
     local subcmd=$2
@@ -108,6 +116,7 @@ function __zpack_apply() {
     if [[ -n $ZPACK_CACHE ]]; then
         unset ZPACK_CACHE
         source $ZPACK_CACHE_FILE
+        ZPACK_STATS[cache_hit]=1
     fi
     __zpack_completion apply
 }
@@ -115,6 +124,14 @@ function __zpack_apply() {
 
 # Init function
 function __zpack_init() {
+    if ! zmodload zsh/datetime; then
+        __zpack_err "Could not load zsh/datetime module."
+        return 1
+    fi
+
+    typeset -gA ZPACK_STATS
+    ZPACK_STATS[init_start]=$EPOCHREALTIME
+
     # Check cache
     if [[ -f $ZPACK_CACHE_FILE && $ZPACK_CACHE_FILE -nt ${ZDOTDIR:-$HOME}/.zshrc ]]; then
         ZPACK_CACHE=1
@@ -124,14 +141,17 @@ function __zpack_init() {
         ZPACK_RELEASES=()
         ZPACK_SNIPPETS=()
         ZPACK_BUNDLES=()
+        ZPACK_BINARIES=()
 
         # Setup directories and files
         local dir
         for dir in $ZPACK_BIN_DIR $ZPACK_CACHE_DIR; do
             [[ -d $dir ]] || mkdir -p $dir
         done
+        rm -f $ZPACK_COMPDUMP_PATH
         : > $ZPACK_CACHE_FILE
         __zpack_cache "#!/usr/bin/env zsh"
+        __zpack_stats_time cache start
         __zpack_path $ZPACK_BIN_DIR
 
         # Zsh Plugin Standard
@@ -157,12 +177,15 @@ function __zpack_init() {
         "list"    "print plugins, releases, snippets, bundles and binaries"
         "reset"   "delete cache and bin dirs and restart shell"
         "prune"   "delete everything and restart shell"
+        "stats"   "print statistics about zpack"
         "help"    "print usage information"
     )
 
     # Init completion
     autoload -Uz __zpack_completion
     __zpack_completion init
+
+    ZPACK_STATS[init_end]=$EPOCHREALTIME
 }
 
 __zpack_init $@

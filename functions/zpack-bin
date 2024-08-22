@@ -10,6 +10,7 @@ function __zpack_bin() {
         ln -s $file $destination
         commands[$name]=$destination
     fi
+    ZPACK_BINARIES+=( $name )
 }
 
 function __zpack_bins() {

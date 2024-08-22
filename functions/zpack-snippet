@@ -27,6 +27,7 @@ function zpack-snippet() {
         fi
     fi
 
+    __zpack_stats_time "snippet_$url" start
     if [[ -n $completion || ${location:t} = _[^_]* ]]; then
         __zpack_fpath $dir
     elif [[ -n $bin ]]; then
@@ -37,6 +38,7 @@ function zpack-snippet() {
         __zpack_err "Failed to load snippet '${location:t}'"
         return 1
     fi
+    __zpack_stats_time "snippet_$url" end
 
     ZPACK_SNIPPETS+=( $url )
 }

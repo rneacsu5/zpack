@@ -5,6 +5,8 @@ function zpack-apply() {
     __zpack_cache_var ZPACK_SNIPPETS
     __zpack_cache_var ZPACK_RELEASES
     __zpack_cache_var ZPACK_BUNDLES
+    __zpack_cache_var ZPACK_BINARIES
+    __zpack_stats_time cache end
 
     zpack-compile $ZPACK_DIR/zpack.zsh
     zpack-compile $ZPACK_DIR/functions/*

@@ -1,0 +1,83 @@
+#!/usr/bin/env zsh
+
+function __zpack_stats_print_time() {
+  local time=$1 time_str
+
+  time_str=$(printf "%7.3f" $(( $time * 1000 )))
+
+  if [[ $time -lt 0.025 ]]; then
+    print -Pn "%F{green}$time_str ms%f"
+  elif [[ $time -lt 0.5 ]]; then
+    print -Pn "%F{yellow}$time_str ms%f"
+  elif [[ $time -lt 1.0 ]]; then
+    print -Pn "%F{red}$time_str ms%f"
+  else
+    time_str=$(printf "%7.3f" $time)
+    print -Pn "%B%F{red}$time_str s%f%b"
+  fi
+}
+
+function __zpack_stats_calc_time() {
+  local key=$1
+
+  if [[ -n $ZPACK_STATS[${key}_end] ]]; then
+    time=$(( $ZPACK_STATS[${key}_end] - $ZPACK_STATS[${key}_start] ))
+    if [[ $key = plugin_* ]]; then
+      (( plugins_time += time ))
+    elif [[ $key = snippet_* ]]; then
+      (( snippets_time += time ))
+    fi
+    (( total_time += time ))
+  fi
+}
+
+function zpack-stats() {
+  local time
+  local total_time=0 plugins_time=0 snippets_time=0
+
+  __zpack_out_plain "General stats:"
+  __zpack_out_plain "  Plugins count: ${#ZPACK_PLUGINS}"
+  __zpack_out_plain "  Snippets count: ${#ZPACK_SNIPPETS}"
+  __zpack_out_plain "  Releases count: ${#ZPACK_RELEASES}"
+  __zpack_out_plain "  Bundles count: ${#ZPACK_BUNDLES}"
+  __zpack_out_plain "  Binaries count: ${#ZPACK_BINARIES}"
+
+  __zpack_out_plain "Time stats:"
+
+  __zpack_stats_calc_time init && \
+  __zpack_out_plain "  Init time: $(__zpack_stats_print_time $time)"
+
+  __zpack_out_plain "  Plugins time:"
+  for plugin in "$ZPACK_PLUGINS[@]"; do
+    __zpack_stats_calc_time "plugin_$plugin" && \
+    __zpack_out_plain "    $(__zpack_stats_print_time $time) plugin $plugin)"
+  done
+  __zpack_out_plain "  Total plugins time: $(__zpack_stats_print_time $plugins_time)"
+
+  __zpack_out_plain "  Snippets time:"
+  for snippet in "$ZPACK_SNIPPETS[@]"; do
+    __zpack_stats_calc_time "snippet_$snippet" && \
+    __zpack_out_plain "    $(__zpack_stats_print_time $time) snippet $snippet"
+  done
+  __zpack_out_plain "  Total snippets time: $(__zpack_stats_print_time $snippets_time)"
+
+  if __zpack_stats_calc_time cache; then
+    __zpack_out_plain "Cache stats:"
+    if [[ -n $ZPACK_STATS[cache_hit] ]]; then
+      print -P "  Cache hit: %F{green}yes%f"
+      __zpack_out_plain "  Cache load time: $(__zpack_stats_print_time $time)"
+    else
+      print -P "  Cache hit: %F{red}no%f"
+      __zpack_out_plain "  Cache build time: $(__zpack_stats_print_time $time)"
+    fi
+  fi
+
+  __zpack_out_plain "Completions stats:"
+  __zpack_stats_calc_time "compinit" && \
+  __zpack_out_plain "  compinit time: $(__zpack_stats_print_time $time)"
+  __zpack_out_plain "  compinit status: ${ZPACK_STATS[compinit_status]}"
+
+  __zpack_out_plain "Total time: $(__zpack_stats_print_time $total_time)"
+}
+
+zpack-stats $@

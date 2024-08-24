@@ -24,14 +24,14 @@ function zpack-omz() {
         ZSH_COMPLETIONS_DIR="$ZSH_CACHE_DIR/completions"
         [[ -d $ZSH_COMPLETIONS_DIR ]] || mkdir -p $ZSH_COMPLETIONS_DIR
 
-        __zpack_cache_var ZSH
-        __zpack_cache_var ZSH_CACHE_DIR
-        __zpack_cache_var ZSH_COMPLETIONS_DIR
+        __zpack_cache var ZSH
+        __zpack_cache var ZSH_CACHE_DIR
+        __zpack_cache var ZSH_COMPLETIONS_DIR
 
-        __zpack_fpath $ZSH_COMPLETIONS_DIR
+        __zpack_cache fpath $ZSH_COMPLETIONS_DIR
     fi
 
-    zpack-load $repo $location $branch $completion $before_load $after_load
+    zpack-load $repo@$branch::$location $completion $before_load $after_load
 }
 
 zpack-omz $@

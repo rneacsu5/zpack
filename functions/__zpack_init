@@ -17,81 +17,6 @@ function __zpack_err() {
     print -P %F{red}"$*"%f >&2
 }
 
-
-# Cache functions
-function __zpack_cache() {
-    printf "%s\n" "$*" >>$ZPACK_CACHE_FILE
-}
-
-function __zpack_cache_var() {
-    if [[ ${(Pt)1} = array* ]]; then
-        __zpack_cache "$1=( ${(Pq-@)1} )"
-    else
-        __zpack_cache "$1=${(Pq-)1}"
-    fi
-}
-
-function __zpack_cache_func() {
-    __zpack_cache "$(type -f $1)"
-}
-
-
-# Helper functions
-function __zpack_path() {
-    path+=($1)
-    __zpack_cache "path+=(${(q-)1})"
-}
-
-function __zpack_fpath() {
-    fpath=($1 $fpath)
-    __zpack_cache "fpath=(${(q-)1} \$fpath)"
-}
-
-function __zpack_export() {
-    export $1
-    __zpack_cache_var $1
-    __zpack_cache "export $1"
-}
-
-function __zpack_zstyle() {
-    zstyle $1 $2 $3
-    __zpack_cache "zstyle ${(q-)1} ${(q-)2} ${(q-)3}"
-}
-
-function __zpack_source() {
-    local location=$1
-    local plugin_id=$2
-
-    if [[ -n $plugin_id ]]; then
-        zsh_loaded_plugins+=( $plugin_id )
-        __zpack_cache "zsh_loaded_plugins+=( ${(q-)plugin_id} )"
-    fi
-    ZERO=$location source $location
-    __zpack_cache "ZERO=${(q-)location} source ${(q-)location}"
-}
-
-function __zpack_run_hook() {
-    local name=$1
-    local cmd=${(P)name}
-
-    if [[ -n $cmd ]]; then
-        pushd -q $dir
-        eval $cmd
-        popd -q
-        __zpack_cache "pushd -q ${(q-)dir}"
-        __zpack_cache "eval $cmd"
-        __zpack_cache "popd -q"
-    fi
-}
-
-function __zpack_stats_time() {
-    local key=$1
-    local event=$2
-
-    ZPACK_STATS[${key}_${event}]=$EPOCHREALTIME
-    __zpack_cache "ZPACK_STATS[${key}_${event}]=\$EPOCHREALTIME"
-}
-
 function __zpack_subcmd() {
     local prefix=$1
     local subcmd=$2
@@ -113,17 +38,21 @@ function __zpack_subcmd() {
 }
 
 function __zpack_apply() {
+    unfunction __zpack_apply
+
     if [[ -n $ZPACK_CACHE ]]; then
         unset ZPACK_CACHE
         source $ZPACK_CACHE_FILE
         ZPACK_STATS[cache_hit]=1
     fi
     __zpack_completion apply
+    ZPACK_APPLIED=1
 }
-
 
 # Init function
 function __zpack_init() {
+    unfunction __zpack_init
+
     if ! zmodload zsh/datetime; then
         __zpack_err "Could not load zsh/datetime module."
         return 1
@@ -136,6 +65,8 @@ function __zpack_init() {
     if [[ -f $ZPACK_CACHE_FILE && $ZPACK_CACHE_FILE -nt ${ZDOTDIR:-$HOME}/.zshrc ]]; then
         ZPACK_CACHE=1
     else
+        autoload -Uz __zpack_cache
+
         # Init Variables
         ZPACK_PLUGINS=()
         ZPACK_RELEASES=()
@@ -150,15 +81,14 @@ function __zpack_init() {
         done
         rm -f $ZPACK_COMPDUMP_PATH
         : > $ZPACK_CACHE_FILE
-        __zpack_cache "#!/usr/bin/env zsh"
-        __zpack_stats_time cache start
-        __zpack_path $ZPACK_BIN_DIR
+        __zpack_cache txt "#!/usr/bin/env zsh"
+        __zpack_cache stats_time cache_start
+        __zpack_cache path $ZPACK_BIN_DIR
 
         # Zsh Plugin Standard
         PMSPEC=0fbis
-        typeset -ga zsh_loaded_plugins
-        __zpack_cache_var PMSPEC
-        __zpack_cache "typeset -ga zsh_loaded_plugins"
+        __zpack_cache var PMSPEC
+        __zpack_cache eval "typeset -ga zsh_loaded_plugins"
     fi
 
     # Define commands and their description
@@ -182,8 +112,7 @@ function __zpack_init() {
     )
 
     # Init completion
-    autoload -Uz __zpack_completion
-    __zpack_completion init
+    autoload -Uz __zpack_completion && __zpack_completion init
 
     ZPACK_STATS[init_end]=$EPOCHREALTIME
 }

@@ -38,22 +38,22 @@ function __zpack_bundle_fzf() {
     fi
     if [[ -n $tab ]]; then
         zpack load Aloxaf/fzf-tab
-        __zpack_zstyle ':completion:*:descriptions' format '[%d]'
-        __zpack_zstyle ':fzf-tab:complete:cd:*' fzf-preview $fzf_tab_preview_cmd
-        __zpack_zstyle ':fzf-tab:complete:cd:*' fzf-min-height 20
-        __zpack_zstyle ':fzf-tab:complete:ls:*' fzf-preview $fzf_tab_preview_cmd
-        __zpack_zstyle ':fzf-tab:complete:ls:*' fzf-min-height 20
+        __zpack_cache_zstyle ':completion:*:descriptions' format '[%d]'
+        __zpack_cache_zstyle ':fzf-tab:complete:cd:*' fzf-preview $fzf_tab_preview_cmd
+        __zpack_cache_zstyle ':fzf-tab:complete:cd:*' fzf-min-height 20
+        __zpack_cache_zstyle ':fzf-tab:complete:ls:*' fzf-preview $fzf_tab_preview_cmd
+        __zpack_cache_zstyle ':fzf-tab:complete:ls:*' fzf-min-height 20
     fi
 
-    __zpack_export FZF_DEFAULT_OPTS
-    __zpack_cache_var FZF_CTRL_T_OPTS
-    __zpack_cache_var FZF_ALT_C_OPTS
+    __zpack_cache export FZF_DEFAULT_OPTS
+    __zpack_cache var FZF_CTRL_T_OPTS
+    __zpack_cache var FZF_ALT_C_OPTS
 }
 
 function __zpack_bundle_bat() {
     zpack release sharkdp/bat $@
     BAT_THEME="base16"
-    __zpack_export BAT_THEME
+    __zpack_cache export BAT_THEME
 }
 
 function __zpack_bundle_exa() {
@@ -68,7 +68,7 @@ function __zpack_bundle_plow() {
         eval "$(plow --completion-script-zsh)"
         plow $@
     }
-    __zpack_cache_func plow
+    __zpack_cache func plow
 }
 
 function __zpack_bundle_zsh-users() {
@@ -78,13 +78,28 @@ function __zpack_bundle_zsh-users() {
     zpack load zsh-users/zsh-syntax-highlighting
 
     zpack load zsh-users/zsh-history-substring-search --after-load '
-        bindkey "$terminfo[kcuu1]" history-substring-search-up
-        bindkey "$terminfo[kcud1]" history-substring-search-down
+        bindkey -M emacs "^[[A" history-substring-search-up
+        bindkey -M viins "^[[A" history-substring-search-up
+        bindkey -M vicmd "^[[A" history-substring-search-up
+        if [[ -n "${terminfo[kcuu1]}" ]]; then
+            bindkey -M emacs "${terminfo[kcuu1]}" history-substring-search-up
+            bindkey -M viins "${terminfo[kcuu1]}" history-substring-search-up
+            bindkey -M vicmd "${terminfo[kcuu1]}" history-substring-search-up
+        fi
+
+        bindkey -M emacs "^[[B" history-substring-search-down
+        bindkey -M viins "^[[B" history-substring-search-down
+        bindkey -M vicmd "^[[B" history-substring-search-down
+        if [[ -n "${terminfo[kcud1]}" ]]; then
+            bindkey -M emacs "${terminfo[kcud1]}" history-substring-search-down
+            bindkey -M viins "${terminfo[kcud1]}" history-substring-search-down
+            bindkey -M vicmd "${terminfo[kcud1]}" history-substring-search-down
+        fi
     '
 }
 
 function __zpack_bundle_powerlevel10k() {
-    zpack load romkatv/powerlevel10k powerlevel10k --after-load '
+    zpack load romkatv/powerlevel10k::powerlevel10k --after-load '
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
     '
 }
@@ -105,14 +120,12 @@ function __zpack_bundle_zoxide() {
     if [[ -n $cmd ]]; then
         ZOXIDE_CMD_OVERRIDE=$cmd[2]
     fi
-    eval "$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)"
-    __zpack_cache "eval \"\$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)\""
+    __zpack_cache eval "eval \"\$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)\""
 }
 
 function __zpack_bundle_lazygit() {
     zpack release jesseduffield/lazygit $@
-    alias lg='lazygit'
-    __zpack_cache "alias lg='lazygit'"
+    __zpack_cache eval "alias lg='lazygit'"
 }
 
 {
@@ -141,7 +154,9 @@ function zpack-bundle() {
     fi
 
     shift
+    __zpack_cache stats_time "bundle_${bundle}_start"
     __zpack_bundle_$bundle $@
+    __zpack_cache stats_time "bundle_${bundle}_end"
     ZPACK_BUNDLES+=($bundle)
 }
 

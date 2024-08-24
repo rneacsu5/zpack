@@ -33,9 +33,7 @@ function _zpack_load() {
 		'--completion[only add to fpath]' \
 		'--before-load[command to run before load]:command' \
 		'--after-load[command to run after load]:command' \
-        '1:repository or local path' \
-        '2:location to load' \
-        '3:branch or tag'
+        '1:repository or local path'
 }
 
 function _zpack_omz() {
@@ -47,9 +45,7 @@ function _zpack_omz() {
 function _zpack_bin() {
     _arguments \
         '(-n --name)'{-n,--name}'[binary name (only when location is a file)]:name' \
-        '1:repository or local path' \
-        '2:location to load' \
-        '3:branch or tag'
+        '1:repository or local path'
 }
 
 function _zpack_update() {

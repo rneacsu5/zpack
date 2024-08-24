@@ -1,0 +1,72 @@
+#!/usr/bin/env zsh
+
+function __zpack_cache_txt() {
+    if [[ -z $ZPACK_APPLIED ]]; then
+        printf "%s\n" "$*" >>$ZPACK_CACHE_FILE
+    fi
+}
+
+function __zpack_cache_eval() {
+    eval "$@" || return 1
+    __zpack_cache_txt "$@"
+}
+
+function __zpack_cache_var() {
+    if [[ ${(Pt)1} = array* ]]; then
+        __zpack_cache_txt "$1=( ${(Pq-@)1} )"
+    else
+        __zpack_cache_txt "$1=${(Pq-)1}"
+    fi
+}
+
+function __zpack_cache_func() {
+    __zpack_cache_txt "$(type -f $1)"
+}
+
+function __zpack_cache_path() {
+    __zpack_cache_eval "path+=(${(q-)1})"
+}
+
+function __zpack_cache_fpath() {
+    __zpack_cache_eval "fpath=(${(q-)1} \$fpath)"
+}
+
+function __zpack_cache_export() {
+    __zpack_cache_var $1
+    __zpack_cache_eval "export $1"
+}
+
+function __zpack_cache_zstyle() {
+    __zpack_cache_eval "zstyle ${(q-)1} ${(q-)2} ${(q-)3}"
+}
+
+function __zpack_cache_source() {
+    local location=$1
+    local plugin_id=$2
+
+    if [[ -n $plugin_id ]]; then
+        __zpack_cache_eval "zsh_loaded_plugins+=( ${(q-)plugin_id} )"
+    fi
+    __zpack_cache_eval "ZERO=${(q-)location} source ${(q-)location}"
+}
+
+function __zpack_cache_run_hook() {
+    local name=$1
+    local cmd=${(P)name}
+
+    if [[ -n $cmd ]]; then
+        __zpack_cache_eval "pushd -q ${(q-)dir}"
+        __zpack_cache_eval "$cmd"
+        __zpack_cache_eval "popd -q"
+    fi
+}
+
+function __zpack_cache_stats_time() {
+    __zpack_cache_eval "ZPACK_STATS[$1]=\$EPOCHREALTIME"
+}
+
+function __zpack_cache() {
+  __zpack_subcmd cache $@
+}
+
+__zpack_cache $@

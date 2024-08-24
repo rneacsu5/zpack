@@ -11,8 +11,7 @@ ZPACK_COMPDUMP_PATH="$ZPACK_CACHE_DIR/zcompdump_$ZSH_VERSION"
 
 # Init ZPack
 fpath=($ZPACK_FUNCTIONS_DIR $fpath)
-autoload -Uz __zpack_init
-__zpack_init
+autoload -Uz __zpack_init && __zpack_init
 
 function zpack() {
     local cmd=$1

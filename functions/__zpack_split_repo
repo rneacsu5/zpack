@@ -1,0 +1,50 @@
+#!/usr/bin/env zsh
+
+# Split a repository string into its parts
+# Valid formats:
+#   repo
+#   repo@branch
+#   repo::path
+#   repo@branch::path
+#   repo@::path
+#   repo@
+#   repo::
+function __zpack_split_repo() {
+    local parts
+
+    repo=""
+    branch=""
+    repo_path=""
+
+    parts=("${(s:@:)1}")
+
+    if [[ ${#parts} -eq 1 ]]; then
+        parts=$parts[1]
+        parts=("${(s.::.)parts}")
+
+        if [[ ${#parts} -eq 1 ]]; then
+            repo=$parts[1]
+        else
+            repo=$parts[1]
+            shift parts
+            parts=${(j.::.)parts}
+            repo_path=$parts
+        fi
+    else
+        repo=$parts[1]
+        shift parts
+        parts=${(j:@:)parts}
+        parts=("${(s.::.)parts}")
+
+        if [[ ${#parts} -eq 1 ]]; then
+            branch=$parts[1]
+        else
+            branch=$parts[1]
+            shift parts
+            parts=${(j.::.)parts}
+            repo_path=$parts
+        fi
+    fi
+}
+
+__zpack_split_repo $@

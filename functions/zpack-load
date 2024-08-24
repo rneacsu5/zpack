@@ -9,18 +9,18 @@ function __zpack_plugin_source() {
     local location=$1
 
     if [[ -d "$dir/functions" ]]; then
-        __zpack_fpath "$dir/functions"
+        __zpack_cache fpath "$dir/functions"
     elif [[ $repo = *ohmyzsh* ]]; then
         if [[ $repo_path != lib/* ]]; then
-            __zpack_fpath ${location:h}
+            __zpack_cache fpath ${location:h}
         fi
     else
-        __zpack_fpath $dir
+        __zpack_cache fpath $dir
     fi
 
     ZPACK_PLUGINS+=( $plugin_id )
 
-    __zpack_source $location $plugin_id
+    __zpack_cache source $location $plugin_id
 }
 
 function zpack-load() {
@@ -35,7 +35,7 @@ function zpack-load() {
 
     if [[ $# == 0 ]]; then
         __zpack_err "'load' requires at least one parameter:"
-        __zpack_err "    zpack load <repo> [location] [branch]"
+        __zpack_err "    zpack load <repo>[@<branch>][::<location>]"
         __zpack_err "                      [--completion]"
         __zpack_err "                      [--before-load <cmd>] [--after-load <cmd>]"
         return 1
@@ -49,9 +49,7 @@ function zpack-load() {
         fi
     else
         # Remote repo
-        repo=$1
-        repo_path=$2
-        branch=$3
+        __zpack_split_repo $1 || return 1
 
         dir="$(__zpack_dir plugin $repo $branch)"
         location="$dir/$repo_path"
@@ -68,15 +66,15 @@ function zpack-load() {
         plugin_id=$repo
     fi
 
-    __zpack_stats_time "plugin_$plugin_id" start
-    __zpack_run_hook before_load
+    __zpack_cache stats_time "plugin_${plugin_id}_start"
+    __zpack_cache run_hook before_load
 
     # Don't source, just fpath
     if [[ -n $completion ]]; then
         if [[ -d $location ]]; then
-            __zpack_fpath $location
+            __zpack_cache fpath $location
         elif [[ -f $location && -d ${location:h} ]]; then
-            __zpack_fpath ${location:h}
+            __zpack_cache fpath ${location:h}
         else
             __zpack_err "Failed to add completion for '$location'"
             return 1
@@ -112,7 +110,7 @@ function zpack-load() {
         __zpack_plugin_source $location/*\.sh([1])
 
     elif [[ -d "${location}" ]]; then
-        __zpack_fpath "${location}"
+        __zpack_cache fpath "${location}"
 
     else
         __zpack_err "Failed to load '$location'"
@@ -124,8 +122,8 @@ function zpack-load() {
         zpack-bin $dir
     fi
 
-    __zpack_run_hook after_load
-    __zpack_stats_time "plugin_$plugin_id" end
+    __zpack_cache run_hook after_load
+    __zpack_cache stats_time "plugin_${plugin_id}_end"
 }
 
 zpack-load $@

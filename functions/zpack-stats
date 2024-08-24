@@ -26,6 +26,8 @@ function __zpack_stats_calc_time() {
       (( plugins_time += time ))
     elif [[ $key = snippet_* ]]; then
       (( snippets_time += time ))
+    elif [[ $key = bundle_* ]]; then
+      (( bundles_time += time ))
     else
       (( total_time += time ))
     fi
@@ -36,7 +38,7 @@ function __zpack_stats_calc_time() {
 
 function zpack-stats() {
   local time
-  local total_time=0 plugins_time=0 snippets_time=0
+  local total_time=0 plugins_time=0 snippets_time=0 bundles_time=0
 
   __zpack_out_plain "General stats:"
   __zpack_out_plain "  Plugins count: ${#ZPACK_PLUGINS}"
@@ -63,6 +65,13 @@ function zpack-stats() {
     __zpack_out_plain "    $(__zpack_stats_print_time $time) snippet $snippet"
   done
   __zpack_out_plain "  Total snippets time: $(__zpack_stats_print_time $snippets_time)"
+
+  __zpack_out_plain "  Bundles time:"
+  for bundle in "$ZPACK_BUNDLES[@]"; do
+    __zpack_stats_calc_time "bundle_$bundle" && \
+    __zpack_out_plain "    $(__zpack_stats_print_time $time) bundle $bundle"
+  done
+  __zpack_out_plain "  Total bundles time: $(__zpack_stats_print_time $bundles_time)"
 
   if __zpack_stats_calc_time cache; then
     __zpack_out_plain "Cache stats:"

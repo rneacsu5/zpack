@@ -2,37 +2,37 @@
 
 function zpack-list() {
     local item
-    if [[ -n $ZPACK_PLUGINS ]]; then
+    if [[ -n $__ZPACK_PLUGINS ]]; then
         __zpack_out_plain "Plugins:"
-        for item in $ZPACK_PLUGINS; do
+        for item in $__ZPACK_PLUGINS; do
             __zpack_out_plain "    $item"
         done
     fi
 
-    if [[ -n $ZPACK_RELEASES ]]; then
+    if [[ -n $__ZPACK_RELEASES ]]; then
         __zpack_out_plain "Releases:"
-        for item in $ZPACK_RELEASES; do
+        for item in $__ZPACK_RELEASES; do
             __zpack_out_plain "    $item"
         done
     fi
 
-    if [[ -n $ZPACK_SNIPPETS ]]; then
+    if [[ -n $__ZPACK_SNIPPETS ]]; then
         __zpack_out_plain "Snippets:"
-        for item in $ZPACK_SNIPPETS; do
+        for item in $__ZPACK_SNIPPETS; do
             __zpack_out_plain "    $item"
         done
     fi
 
-    if [[ -n $ZPACK_BUNDLES ]]; then
+    if [[ -n $__ZPACK_BUNDLES ]]; then
         __zpack_out_plain "Bundles:"
-        for item in $ZPACK_BUNDLES; do
+        for item in $__ZPACK_BUNDLES; do
             __zpack_out_plain "    $item"
         done
     fi
 
-    if [[ -n $ZPACK_BINARIES ]]; then
+    if [[ -n $__ZPACK_BINARIES ]]; then
         __zpack_out_plain "Binaries:"
-        for item in $ZPACK_BINARIES; do
+        for item in $__ZPACK_BINARIES; do
             __zpack_out_plain "    $item"
         done
     fi

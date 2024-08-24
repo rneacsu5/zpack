@@ -15,7 +15,7 @@ function __zpack_bundle_fzf() {
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/key-bindings.zsh
     zpack snippet https://github.com/junegunn/fzf/raw/master/shell/completion.zsh
 
-    FZF_DEFAULT_OPTS="$ZPACK_FZF_DEFAULT_OPTS --prompt='~ ' --pointer='▶' --marker='✓' --color=16"
+    typeset -g FZF_DEFAULT_OPTS="$ZPACK_FZF_DEFAULT_OPTS --prompt='~ ' --pointer='▶' --marker='✓' --color=16"
     if [[ $ZPACK_FZF_CASE_SENSITIVE != true ]]; then
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS -i"
     fi
@@ -33,8 +33,8 @@ function __zpack_bundle_fzf() {
         fzf_preview_cmd="{ [[ -f {} ]] && $cat_cmd {} } || { [[ -d {} ]] && $tree_cmd {} }"
         fzf_tab_preview_cmd=${fzf_preview_cmd//\{\}/\$realpath}
 
-        FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '$fzf_preview_cmd'"
-        FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
+        typeset -g FZF_CTRL_T_OPTS="$FZF_CTRL_T_OPTS --height 80% --preview '$fzf_preview_cmd'"
+        typeset -g FZF_ALT_C_OPTS="$FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS"
     fi
     if [[ -n $tab ]]; then
         zpack load Aloxaf/fzf-tab
@@ -118,9 +118,9 @@ function __zpack_bundle_zoxide() {
 
     zpack release ajeetdsouza/zoxide $@
     if [[ -n $cmd ]]; then
-        ZOXIDE_CMD_OVERRIDE=$cmd[2]
+        cmd=$cmd[2]
     fi
-    __zpack_cache eval "eval \"\$(zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} zsh)\""
+    __zpack_cache eval "eval \"\$(zoxide init --cmd ${cmd:-z} zsh)\""
 }
 
 function __zpack_bundle_lazygit() {
@@ -130,9 +130,9 @@ function __zpack_bundle_lazygit() {
 
 {
     local fun
-    __ZPACK_BUNDLES=()
+    typeset -ga __ZPACK_ALL_BUNDLES=()
     for fun in ${(k)functions}; do
-        [[ $fun = __zpack_bundle_* ]] && __ZPACK_BUNDLES+=( ${fun#__zpack_bundle_} )
+        [[ $fun = __zpack_bundle_* ]] && __ZPACK_ALL_BUNDLES+=( ${fun#__zpack_bundle_} )
     done
 }
 
@@ -140,7 +140,7 @@ function zpack-bundle() {
     if [[ $# == 0 ]]; then
         __zpack_out_plain "Available bundles:"
         local bundle
-        for bundle in $__ZPACK_BUNDLES; do
+        for bundle in $__ZPACK_ALL_BUNDLES; do
             __zpack_out_plain "    ${bundle}"
         done
         return
@@ -157,7 +157,7 @@ function zpack-bundle() {
     __zpack_cache stats_time "bundle_${bundle}_start"
     __zpack_bundle_$bundle $@
     __zpack_cache stats_time "bundle_${bundle}_end"
-    ZPACK_BUNDLES+=($bundle)
+    __ZPACK_BUNDLES+=($bundle)
 }
 
 zpack-bundle $@

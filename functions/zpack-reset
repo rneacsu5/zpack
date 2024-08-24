@@ -2,7 +2,7 @@
 
 function zpack-reset() {
     local dir
-    for dir in $ZPACK_BIN_DIR $ZPACK_CACHE_DIR; do
+    for dir in ${ZPACK[bin_dir]} ${ZPACK[cache_dir]}; do
         __zpack_out "Deleting '$dir'"
         rm -drf "$dir"
     done
@@ -12,8 +12,8 @@ function zpack-reset() {
     [[ -f $p10k_instant_prompt ]] && rm -f $p10k_instant_prompt
 
     __zpack_out "Deleting compiled files"
-    rm -f $ZPACK_DIR/functions/*.zwc(N)
-    rm -f $ZPACK_DIR/*.zwc(N)
+    rm -f ${ZPACK[dir]}/functions/*.zwc(N)
+    rm -f ${ZPACK[dir]}/*.zwc(N)
 
     __zpack_out "Restarting shell"
     exec $SHELL

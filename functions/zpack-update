@@ -10,29 +10,29 @@ function zpack-update() {
     fi
 
     if [[ $type == "all" || $type == "self" ]]; then
-        if [[ -e "$ZPACK_DIR/.git" ]]; then
+        if [[ -e "${ZPACK[dir]}/.git" ]]; then
             __zpack_out "Updating ZPack"
-            git -C $ZPACK_DIR pull --ff-only
+            git -C ${ZPACK[dir]} pull --ff-only
         fi
     fi
 
     if [[ $type == "all" || $type == "plugins" ]]; then
         local repo dir
-        for repo in $ZPACK_PLUGINS_DIR/**/.git(/F); do
+        for repo in ${ZPACK[plugins_dir]}/**/.git(/F); do
             dir="${repo%/.git}"
 
-            __zpack_out "Updating '${${dir#$ZPACK_PLUGINS_DIR/}:h}'"
+            __zpack_out "Updating '${${dir#${ZPACK[plugins_dir]}/}:h}'"
 
             git -C $dir reset --hard --quiet
             git -C $dir clean -df --quiet
             git -C $dir pull  --ff-only
         done
 
-        for version_file in $ZPACK_RELEASES_DIR/**/.zpack_release_version(.); do
+        for version_file in ${ZPACK[releases_dir]}/**/.zpack_release_version(.); do
             rm "$version_file"
         done
 
-        for snippet in $ZPACK_SNIPPETS_DIR/**/*(.); do
+        for snippet in ${ZPACK[snippets_dir]}/**/*(.); do
             rm "$snippet"
         done
     fi

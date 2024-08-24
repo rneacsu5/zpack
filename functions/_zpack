@@ -63,9 +63,13 @@ function _zpack_bundle() {
         '*::arg:->args' \
     && ret=0
 
+    if [[ -z $__ZPACK_ALL_BUNDLES ]]; then
+        autoload -Uz zpack-bundle && zpack-bundle >/dev/null
+    fi
+
     case $state in
         bundle)
-            _describe -t bundles "zpack bundles" __ZPACK_BUNDLES && ret=0
+            _describe -t bundles "zpack bundles" __ZPACK_ALL_BUNDLES && ret=0
             ;;
         args)
             local bundle=$words[1]
@@ -82,7 +86,7 @@ function _zpack_bundle() {
                     && ret=0
                     ;;
                 *)
-                    if [[ $__ZPACK_BUNDLES[(Ie)$bundle] -gt 0 ]]; then
+                    if [[ $__ZPACK_ALL_BUNDLES[(Ie)$bundle] -gt 0 ]]; then
                         _message 'no more arguments' && ret=0
                     fi
                     ;;

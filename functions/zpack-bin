@@ -3,14 +3,14 @@
 function __zpack_bin() {
     local file="${1}"
     local name="${2:-${file:t}}"
-    local destination="$ZPACK_BIN_DIR/$name"
+    local destination="${ZPACK[bin_dir]}/$name"
 
     if [[ ! -e $destination ]]; then
         chmod +x $file
         ln -s $file $destination
         commands[$name]=$destination
     fi
-    ZPACK_BINARIES+=( $name )
+    __ZPACK_BINARIES+=( $name )
 }
 
 function __zpack_bins() {

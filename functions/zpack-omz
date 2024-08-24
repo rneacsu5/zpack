@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 function zpack-omz() {
-    local completion location repo before_load after_load
+    local completion location repo branch before_load after_load
     zparseopts -D -E -completion=completion \
         -before-load:=before_load -after-load:=after_load \
         || return 1
@@ -19,9 +19,9 @@ function zpack-omz() {
     if [[ -z $ZSH ]]; then
         zpack-clone $repo $branch
 
-        ZSH="$(__zpack_dir plugin $repo $branch)"
-        ZSH_CACHE_DIR="$ZSH/cache"
-        ZSH_COMPLETIONS_DIR="$ZSH_CACHE_DIR/completions"
+        typeset -g ZSH="$(__zpack_dir plugin $repo $branch)"
+        typeset -g ZSH_CACHE_DIR="$ZSH/cache"
+        typeset -g ZSH_COMPLETIONS_DIR="$ZSH_CACHE_DIR/completions"
         [[ -d $ZSH_COMPLETIONS_DIR ]] || mkdir -p $ZSH_COMPLETIONS_DIR
 
         __zpack_cache var ZSH

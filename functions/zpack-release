@@ -93,7 +93,7 @@ function __zpack_release_filter_pattern() {
 }
 
 function __zpack_release_install_pattern() {
-    local found
+    local found file
     local pattern=$1
 
     for file in ${~pattern}; do
@@ -159,8 +159,8 @@ function zpack-release() {
 
     dir=$(__zpack_dir release $repo)
     [[ -d $dir ]] || mkdir -p $dir
-    id=${dir#$ZPACK_RELEASES_DIR/}
-    ZPACK_RELEASES+=($id)
+    id=${dir#${ZPACK[releases_dir]}/}
+    __ZPACK_RELEASES+=($id)
 
     if [[ -n $name ]]; then
         name="${name[2]}"

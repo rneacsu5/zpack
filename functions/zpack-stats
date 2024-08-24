@@ -20,8 +20,8 @@ function __zpack_stats_print_time() {
 function __zpack_stats_calc_time() {
   local key=$1
 
-  if [[ -n $ZPACK_STATS[${key}_end] ]]; then
-    time=$(( $ZPACK_STATS[${key}_end] - $ZPACK_STATS[${key}_start] ))
+  if [[ -n $ZPACK[stats_${key}_end] ]]; then
+    time=$(( $ZPACK[stats_${key}_end] - $ZPACK[stats_${key}_start] ))
     if [[ $key = plugin_* ]]; then
       (( plugins_time += time ))
     elif [[ $key = snippet_* ]]; then
@@ -41,11 +41,11 @@ function zpack-stats() {
   local total_time=0 plugins_time=0 snippets_time=0 bundles_time=0
 
   __zpack_out_plain "General stats:"
-  __zpack_out_plain "  Plugins count: ${#ZPACK_PLUGINS}"
-  __zpack_out_plain "  Snippets count: ${#ZPACK_SNIPPETS}"
-  __zpack_out_plain "  Releases count: ${#ZPACK_RELEASES}"
-  __zpack_out_plain "  Bundles count: ${#ZPACK_BUNDLES}"
-  __zpack_out_plain "  Binaries count: ${#ZPACK_BINARIES}"
+  __zpack_out_plain "  Plugins count: ${#__ZPACK_PLUGINS}"
+  __zpack_out_plain "  Snippets count: ${#__ZPACK_SNIPPETS}"
+  __zpack_out_plain "  Releases count: ${#__ZPACK_RELEASES}"
+  __zpack_out_plain "  Bundles count: ${#__ZPACK_BUNDLES}"
+  __zpack_out_plain "  Binaries count: ${#__ZPACK_BINARIES}"
 
   __zpack_out_plain "Time stats:"
 
@@ -53,21 +53,21 @@ function zpack-stats() {
   __zpack_out_plain "  Init time: $(__zpack_stats_print_time $time)"
 
   __zpack_out_plain "  Plugins time:"
-  for plugin in "$ZPACK_PLUGINS[@]"; do
+  for plugin in "$__ZPACK_PLUGINS[@]"; do
     __zpack_stats_calc_time "plugin_$plugin" && \
     __zpack_out_plain "    $(__zpack_stats_print_time $time) plugin $plugin)"
   done
   __zpack_out_plain "  Total plugins time: $(__zpack_stats_print_time $plugins_time)"
 
   __zpack_out_plain "  Snippets time:"
-  for snippet in "$ZPACK_SNIPPETS[@]"; do
+  for snippet in "$__ZPACK_SNIPPETS[@]"; do
     __zpack_stats_calc_time "snippet_$snippet" && \
     __zpack_out_plain "    $(__zpack_stats_print_time $time) snippet $snippet"
   done
   __zpack_out_plain "  Total snippets time: $(__zpack_stats_print_time $snippets_time)"
 
   __zpack_out_plain "  Bundles time:"
-  for bundle in "$ZPACK_BUNDLES[@]"; do
+  for bundle in "$__ZPACK_BUNDLES[@]"; do
     __zpack_stats_calc_time "bundle_$bundle" && \
     __zpack_out_plain "    $(__zpack_stats_print_time $time) bundle $bundle"
   done
@@ -75,7 +75,7 @@ function zpack-stats() {
 
   if __zpack_stats_calc_time cache; then
     __zpack_out_plain "Cache stats:"
-    if [[ -n $ZPACK_STATS[cache_hit] ]]; then
+    if [[ -n $ZPACK[cache_hit] ]]; then
       print -P "  Cache hit: %F{green}yes%f"
       __zpack_out_plain "  Cache load time: $(__zpack_stats_print_time $time)"
     else
@@ -87,7 +87,7 @@ function zpack-stats() {
   fi
 
   __zpack_out_plain "Completions stats:"
-  __zpack_out_plain "  compinit status: ${ZPACK_STATS[compinit_status]}"
+  __zpack_out_plain "  compinit status: ${ZPACK[stats_compinit_status]}"
   __zpack_stats_calc_time compinit && \
   __zpack_out_plain "  compinit time: $(__zpack_stats_print_time $time)"
   __zpack_stats_calc_time compinit_compile && \

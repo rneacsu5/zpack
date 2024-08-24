@@ -40,7 +40,7 @@ function zpack-snippet() {
     fi
     __zpack_cache stats_time "snippet_${url}_end"
 
-    ZPACK_SNIPPETS+=( $url )
+    __ZPACK_SNIPPETS+=( $url )
 }
 
 zpack-snippet $@

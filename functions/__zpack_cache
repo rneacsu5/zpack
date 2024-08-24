@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 
 function __zpack_cache_txt() {
-    if [[ -z $ZPACK_APPLIED ]]; then
-        printf "%s\n" "$*" >>$ZPACK_CACHE_FILE
+    if [[ -z ${ZPACK[applied]} ]]; then
+        printf "%s\n" "$*" >>${ZPACK[cache_file]}
     fi
 }
 
@@ -62,7 +62,7 @@ function __zpack_cache_run_hook() {
 }
 
 function __zpack_cache_stats_time() {
-    __zpack_cache_eval "ZPACK_STATS[$1]=\$EPOCHREALTIME"
+    __zpack_cache_eval "ZPACK[stats_$1]=\$EPOCHREALTIME"
 }
 
 function __zpack_cache() {

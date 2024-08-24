@@ -40,13 +40,13 @@ function __zpack_subcmd() {
 function __zpack_apply() {
     unfunction __zpack_apply
 
-    if [[ -n $ZPACK_CACHE ]]; then
-        unset ZPACK_CACHE
-        source $ZPACK_CACHE_FILE
-        ZPACK_STATS[cache_hit]=1
+    if [[ -n ${ZPACK[cache]} ]]; then
+        unset "ZPACK[cache]"
+        source ${ZPACK[cache_file]}
+        ZPACK[cache_hit]=1
     fi
     __zpack_completion apply
-    ZPACK_APPLIED=1
+    ZPACK[applied]=1
 }
 
 # Init function
@@ -58,35 +58,34 @@ function __zpack_init() {
         return 1
     fi
 
-    typeset -gA ZPACK_STATS
-    ZPACK_STATS[init_start]=$EPOCHREALTIME
+    ZPACK[stats_init_start]=$EPOCHREALTIME
 
     # Check cache
-    if [[ -f $ZPACK_CACHE_FILE && $ZPACK_CACHE_FILE -nt ${ZDOTDIR:-$HOME}/.zshrc ]]; then
-        ZPACK_CACHE=1
+    if [[ -f ${ZPACK[cache_file]} && ${ZPACK[cache_file]} -nt ${ZDOTDIR:-$HOME}/.zshrc ]]; then
+        ZPACK[cache]=1
     else
         autoload -Uz __zpack_cache
 
         # Init Variables
-        ZPACK_PLUGINS=()
-        ZPACK_RELEASES=()
-        ZPACK_SNIPPETS=()
-        ZPACK_BUNDLES=()
-        ZPACK_BINARIES=()
+        typeset -ga __ZPACK_PLUGINS=()
+        typeset -ga __ZPACK_RELEASES=()
+        typeset -ga __ZPACK_SNIPPETS=()
+        typeset -ga __ZPACK_BUNDLES=()
+        typeset -ga __ZPACK_BINARIES=()
 
         # Setup directories and files
         local dir
-        for dir in $ZPACK_BIN_DIR $ZPACK_CACHE_DIR; do
+        for dir in ${ZPACK[bin_dir]} ${ZPACK[cache_dir]}; do
             [[ -d $dir ]] || mkdir -p $dir
         done
-        rm -f $ZPACK_COMPDUMP_PATH
-        : > $ZPACK_CACHE_FILE
+        rm -f ${ZPACK[compdump_path]}
+        : > ${ZPACK[cache_file]}
         __zpack_cache txt "#!/usr/bin/env zsh"
         __zpack_cache stats_time cache_start
-        __zpack_cache path $ZPACK_BIN_DIR
+        __zpack_cache path ${ZPACK[bin_dir]}
 
         # Zsh Plugin Standard
-        PMSPEC=0fbis
+        typeset -g PMSPEC=0fbis
         __zpack_cache var PMSPEC
         __zpack_cache eval "typeset -ga zsh_loaded_plugins"
     fi
@@ -114,7 +113,7 @@ function __zpack_init() {
     # Init completion
     autoload -Uz __zpack_completion && __zpack_completion init
 
-    ZPACK_STATS[init_end]=$EPOCHREALTIME
+    ZPACK[stats_init_end]=$EPOCHREALTIME
 }
 
 __zpack_init $@

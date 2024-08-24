@@ -5,19 +5,19 @@ function __zpack_completion_init {
 
     # Check if compinit was already run
     if [[ ${+_comps} == 1 && ${+_comp_options} == 1 ]]; then
-        ZPACK_STATS[compinit_status]="compinit already loaded"
+        ZPACK[stats_compinit_status]="compinit already loaded"
         if [[ ${ZPACK_IGNORE_COMPINIT} != 1 ]]; then
             __zpack_warn "Warning: completion system was initialised before zpack. This affects performance."
             __zpack_warn "         Disable this warning by fixing the issue or by setting ZPACK_IGNORE_COMPINIT=1"
         fi
     else
         # Mock completion
-        _ZPACK_COMPDEFS=()
-        _ZPACK_COMPLETION=1
+        typeset -ga __ZPACK_COMPDEFS=()
+        typeset -g __ZPACK_COMPLETION=1
 
         function compinit() {}
         function compdef() {
-            _ZPACK_COMPDEFS+=("${(j: :)${(q)@}}")
+            __ZPACK_COMPDEFS+=("${(j: :)${(q)@}}")
         }
 
         # This only defined the 'compgen' and 'complete' functions which in turn
@@ -36,38 +36,38 @@ function __zpack_completion_init {
 function __zpack_completion_apply() {
     unfunction __zpack_completion_apply
 
-    if [[ -n _ZPACK_COMPLETION ]]; then
+    if [[ -n __ZPACK_COMPLETION ]]; then
         # Unmock completion
         unfunction compinit
         unfunction compdef
 
         # Load real completion
-        ZPACK_STATS[compinit_start]=$EPOCHREALTIME
+        ZPACK[stats_compinit_start]=$EPOCHREALTIME
         setopt localoptions extendedglob
-        if [[ -f $ZPACK_COMPDUMP_PATH && -n $ZPACK_COMPDUMP_PATH(#q.Nmh-24) ]]; then
-            autoload -Uz compinit && compinit -d $ZPACK_COMPDUMP_PATH -C
+        if [[ -f ${ZPACK[compdump_path]} && -n ${ZPACK[compdump_path]}(#q.Nmh-24) ]]; then
+            autoload -Uz compinit && compinit -d ${ZPACK[compdump_path]} -C
             if [[ $? -ne 0 ]]; then
                 __zpack_err "Could not initialise completions from cache."
                 return 1
             fi
-            ZPACK_STATS[compinit_status]="loaded from cache"
+            ZPACK[stats_compinit_status]="loaded from cache"
         else
-            if [[ -f $ZPACK_COMPDUMP_PATH ]]; then
-                ZPACK_STATS[compinit_status]="loaded from scratch (stale cache)"
+            if [[ -f ${ZPACK[compdump_path]} ]]; then
+                ZPACK[stats_compinit_status]="loaded from scratch (stale cache)"
             else
-                ZPACK_STATS[compinit_status]="loaded from scratch (missing cache)"
+                ZPACK[stats_compinit_status]="loaded from scratch (missing cache)"
             fi
 
             # Do not dump because we also have to apply completions from mocks
-            autoload -Uz compinit && compinit -d $ZPACK_COMPDUMP_PATH -D
+            autoload -Uz compinit && compinit -d ${ZPACK[compdump_path]} -D
             if [[ $? -ne 0 ]]; then
                 __zpack_err "Could not initialise completions."
                 return 1
             fi
 
             # Apply definitions from mocks
-            local comp
-            for comp in $_ZPACK_COMPDEFS; do
+            local comp comp_args
+            for comp in $__ZPACK_COMPDEFS; do
                 comp_args=("${(z)comp}")
                 comp_args=("${(Q)comp_args[@]}")
                 compdef "$comp_args[@]"
@@ -79,11 +79,11 @@ function __zpack_completion_apply() {
                 return 1
             fi
         fi
-        ZPACK_STATS[compinit_end]=$EPOCHREALTIME
+        ZPACK[stats_compinit_end]=$EPOCHREALTIME
 
         # Cleanup
-        unset _ZPACK_COMPDEFS
-        unset _ZPACK_COMPLETION
+        unset __ZPACK_COMPDEFS
+        unset __ZPACK_COMPLETION
     fi
 }
 

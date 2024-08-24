@@ -18,7 +18,7 @@ function __zpack_plugin_source() {
         __zpack_cache fpath $dir
     fi
 
-    ZPACK_PLUGINS+=( $plugin_id )
+    __ZPACK_PLUGINS+=( $plugin_id )
 
     __zpack_cache source $location $plugin_id
 }

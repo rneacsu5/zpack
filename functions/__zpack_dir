@@ -20,7 +20,7 @@ function __zpack_dir_plugin() {
         return 1
     fi
 
-    print "${ZPACK_PLUGINS_DIR}/$(__zpack_encode_url ${repo:h})/${repo:t}/$branch"
+    print "${ZPACK[plugins_dir]}/$(__zpack_encode_url ${repo:h})/${repo:t}/$branch"
 }
 
 function __zpack_dir_release() {
@@ -31,7 +31,7 @@ function __zpack_dir_release() {
         return 1
     fi
 
-    print "${ZPACK_RELEASES_DIR}/$(__zpack_encode_url ${repo:h})/${repo:t}"
+    print "${ZPACK[releases_dir]}/$(__zpack_encode_url ${repo:h})/${repo:t}"
 }
 
 function __zpack_dir_snippet() {
@@ -42,7 +42,7 @@ function __zpack_dir_snippet() {
         return 1
     fi
 
-    print "${ZPACK_SNIPPETS_DIR}/$(__zpack_encode_url ${${url#https\:\/\/github.com\/}:h})"
+    print "${ZPACK[snippets_dir]}/$(__zpack_encode_url ${${url#https\:\/\/github.com\/}:h})"
 }
 
 function __zpack_dir() {

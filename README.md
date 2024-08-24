@@ -4,7 +4,7 @@ A simple Zsh framework for all your needs.
 
 It is heavily inspired from [zgenom](https://github.com/jandamm/zgenom) which in turn is an extension of [zgen](https://github.com/tarjoilija/zgen) which was in turn inspired by [Antigen](https://github.com/zsh-users/antigen). All credits go to the respective authors and contributors.
 
-The goal was to have a simple to use manager for Zsh plugins, [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh) libraries and plugins, but also GitHub Releases and snippets without manual installation or a complicated `.zshrc`.
+The goal was to have a simple-to-use manager for Zsh plugins, [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh) libraries and plugins, but also GitHub Releases and snippets without manual installation or a complicated `.zshrc`.
 
 Note that despite it being simple, it is not necessarily fast. In my testing, having different configurations and plugins loaded affects the final performance significantly. Also, this was my first interaction with Zsh and Zsh frameworks in general, and testing was limited to my configuration, so use it on your own risk.
 
@@ -14,7 +14,7 @@ Add the following lines to `~/.zshrc`:
 
 ```shell
 # Init zpack
-[[ -d "${HOME}/.zpack" ]] || git clone https://github.com/originalnexus/zpack.git "${HOME}/.zpack"
+[[ -d "${HOME}/.zpack" ]] || git clone https://github.com/rneacsu5/zpack.git "${HOME}/.zpack"
 source "${HOME}/.zpack/zpack.zsh"
 ```
 
@@ -68,7 +68,7 @@ zpack load zsh-users/zsh-history-substring-search --after-load '
 # zpack bundle zsh-users
 
 # Load theme
-zpack load romkatv/powerlevel10k powerlevel10k --after-load '
+zpack load romkatv/powerlevel10k::powerlevel10k --after-load '
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 '
 
@@ -77,7 +77,7 @@ zpack apply
 
 ```
 
-You can also check out my [dotfiles](https://github.com/OriginalNexus/dotfiles) for a working configuration.
+You can also check out my [dotfiles](https://github.com/rneacsu5/dotfiles) for a working configuration.
 
 In order to avoid a warning about completions already initialised, please make sure you have the following in `~/.zshenv`:
 

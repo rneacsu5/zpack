@@ -16,8 +16,9 @@
 
 </p>
 
+<p align="center">
 A simple Zsh manager for all your needs.
-
+</p>
 
 ## Table of Contents
 

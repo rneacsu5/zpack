@@ -4,7 +4,9 @@
 
 <img src="https://www.svgrepo.com/download/236716/package-box.svg" height="130">
 
-A simple Zsh manager for all your needs.
+</p>
+
+<p align="center">
 
 <img src="https://img.shields.io/github/v/release/rneacsu5/zpack?style=flat">
 <img src="https://img.shields.io/github/stars/rneacsu5/zpack?style=flat">
@@ -12,8 +14,10 @@ A simple Zsh manager for all your needs.
 <img src="https://img.shields.io/github/contributors/rneacsu5/zpack?style=flat">
 <img src="https://img.shields.io/github/license/rneacsu5/zpack?style=flat">
 
-
 </p>
+
+A simple Zsh manager for all your needs.
+
 
 ## Table of Contents
 

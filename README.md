@@ -10,7 +10,6 @@
 
 <img src="https://img.shields.io/github/v/release/rneacsu5/zpack?style=flat">
 <img src="https://img.shields.io/github/stars/rneacsu5/zpack?style=flat">
-<img src="https://img.shields.io/github/downloads/rneacsu5/zpack/total?style=flat">
 <img src="https://img.shields.io/github/contributors/rneacsu5/zpack?style=flat">
 <img src="https://img.shields.io/github/license/rneacsu5/zpack?style=flat">
 

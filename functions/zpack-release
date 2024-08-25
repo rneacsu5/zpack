@@ -99,6 +99,7 @@ function __zpack_release_install_pattern() {
     for file in ${~pattern}; do
         zpack-bin --name $name ${file:A}
         found=1
+        break
     done
 
     [[ -n $found ]]

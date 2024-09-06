@@ -10,6 +10,8 @@ function zpack-reset() {
     # Reset powerlevel10k instant prompt
     local p10k_instant_prompt="${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
     [[ -f $p10k_instant_prompt ]] && rm -f $p10k_instant_prompt
+    # Clear OMZ completions dierctory
+    [[ -d $ZSH_COMPLETIONS_DIR ]] && rm -drf $ZSH_COMPLETIONS_DIR
 
     __zpack_out "Deleting compiled files"
     rm -f ${ZPACK[dir]}/functions/*.zwc(N)

@@ -7,7 +7,7 @@ function __zpack_cache_txt() {
 }
 
 function __zpack_cache_eval() {
-    eval "$@" || return 1
+    eval "$@"
     __zpack_cache_txt "$@"
 }
 

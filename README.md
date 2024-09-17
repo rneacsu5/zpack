@@ -62,8 +62,8 @@ Add the following lines to `~/.zshrc`:
 
 ```shell
 # Init zpack
-[[ -d "${HOME}/.zpack" ]] || git clone https://github.com/rneacsu5/zpack.git "${HOME}/.zpack"
-source "${HOME}/.zpack/zpack.zsh"
+[[ -d "${ZDOTDIR:-$HOME}/.zpack" ]] || git clone https://github.com/rneacsu5/zpack.git "${ZDOTDIR:-$HOME}/.zpack"
+source "${ZDOTDIR:-$HOME}/.zpack/zpack.zsh"
 ```
 
 Load plugins, releases, snippets and predefined bundles:

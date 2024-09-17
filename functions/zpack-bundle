@@ -100,7 +100,7 @@ function __zpack_bundle_zsh-users() {
 
 function __zpack_bundle_powerlevel10k() {
     zpack load romkatv/powerlevel10k::powerlevel10k --after-load '
-        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+        [[ ! -f ${POWERLEVEL9K_CONFIG_FILE:=${ZDOTDIR:-~}/.p10k.zsh} ]] || source ${POWERLEVEL9K_CONFIG_FILE:=${ZDOTDIR:-~}/.p10k.zsh}
     '
 }
 

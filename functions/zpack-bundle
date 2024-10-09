@@ -128,6 +128,10 @@ function __zpack_bundle_lazygit() {
     __zpack_cache eval "alias lg='lazygit'"
 }
 
+function __zpack_bundle_k9s() {
+    zpack release derailed/k9s --completion 'k9s completion zsh > _k9s' $@
+}
+
 {
     local fun
     typeset -ga __ZPACK_ALL_BUNDLES=()

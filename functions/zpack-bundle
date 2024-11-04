@@ -39,6 +39,7 @@ function __zpack_bundle_fzf() {
     if [[ -n $tab ]]; then
         zpack load Aloxaf/fzf-tab
         __zpack_cache_zstyle ':completion:*:descriptions' format '[%d]'
+        __zpack_cache_zstyle ':fzf-tab:*' use-fzf-default-opts yes
         __zpack_cache_zstyle ':fzf-tab:complete:cd:*' fzf-preview $fzf_tab_preview_cmd
         __zpack_cache_zstyle ':fzf-tab:complete:cd:*' fzf-min-height 20
         __zpack_cache_zstyle ':fzf-tab:complete:ls:*' fzf-preview $fzf_tab_preview_cmd

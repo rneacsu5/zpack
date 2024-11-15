@@ -171,7 +171,7 @@ The following flags can be used:
 
 ### `zpack release`
 
-Downloads a binary from GitHub Releases and adds it to `PATH`. It takes one argument which is the repository in the format `<author>/<repo>`. The following flags can be used:
+Downloads a binary from GitHub Releases and adds it to `PATH`. It takes one argument which is the repository in the format `<author>/<repo>` or `<author>/<repo>@<version>`. The following flags can be used:
 
 * `--completion` - generate completions for the binary. The argument is the command to run to generate completions. You can use the binary itself to generate completions. The script should generate the `_command` file in the current directory.
 * `-p, --pattern` - assets are automatically filtered by the current OS and platform and the first one is downloaded. Use this flag to specify a pattern to further filter the assets.

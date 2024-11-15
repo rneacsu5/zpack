@@ -137,7 +137,8 @@ function zpack-release() {
 
     if [[ $# == 0 ]]; then
         __zpack_err "'release' requires at least one parameter:"
-        __zpack_err "    zpack release <repo> [--completion <cmd>]"
+        __zpack_err "    zpack release <repo>[@version]"
+        __zpack_err "                         [--completion <cmd>]"
         __zpack_err "                         [-p <pattern>] [--pattern <pattern>]"
         __zpack_err "                         [-f <filter>] [--filter <filter>]"
         __zpack_err "                         [-n <name>] [--name <name>]"
@@ -145,10 +146,11 @@ function zpack-release() {
         return 1
     fi
 
-    repo=$1
+    __zpack_split_repo $1 || return 1
+
     if [[ -n $list ]]; then
         # Just list available assets from latest version
-        __zpack_release_get_assets $repo $(__zpack_release_get_version $repo)
+        __zpack_release_get_assets $repo ${branch:-$(__zpack_release_get_version $repo)}
         return
     fi
 
@@ -173,7 +175,9 @@ function zpack-release() {
 
     # Check existing release
     local version_file=$dir/.zpack_release_version
-    if [[ -f $version_file ]]; then
+    if [[ -n $branch ]]; then
+        version=$branch
+    elif [[ -f $version_file ]]; then
         version=$(< $version_file)
     else
         # Get latest version

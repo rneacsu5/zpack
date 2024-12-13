@@ -38,12 +38,12 @@ function __zpack_release_filter_os() {
 
     case $os in
         (Darwin)
-            filter='*(apple|darwin|apple-darwin|dmg|mac|macos|mac-os)*'
+            filter='*(apple|darwin|apple-darwin|dmg|mac|macos|mac-os|Darwin)*'
         ;;
         (Linux)
-            filter='*linux*'
-            set -- "${(f)$(__zpack_release_filter_pattern $filter $@)}"
-            filter='^*musl*'
+            filter='*(linux|Linux)*'
+            # set -- "${(f)$(__zpack_release_filter_pattern $filter $@)}"
+            # filter='^*musl*'
         ;;
         (MINGW* | MSYS* | CYGWIN* | Windows_NT)
             filter='*pc-windows-gnu*'
